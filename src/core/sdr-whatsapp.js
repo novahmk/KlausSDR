@@ -18,6 +18,11 @@ const escapeStrategy = require('../utils/escape-strategy');
 const { securitySheets } = require('../sheets/security-sheets');
 
 // ============================================
+// CONTROLE DE SESSÃO — apenas leads/mensagens da sessão atual
+// ============================================
+let SYSTEM_ACTIVATION = Date.now();
+
+// ============================================
 // 1. PROMPT DO SISTEMA
 // ============================================
 
@@ -82,6 +87,8 @@ class SDRWhatsAppSystem {
         this.whatsapp.on('ready', () => {
             logger.info('🟢 [SDR IA] Sistema SDR pronto para disparar/escutar mensagens!');
             this.isReady = true;
+            SYSTEM_ACTIVATION = Date.now();
+            logger.info(`[SDR IA] SYSTEM_ACTIVATION atualizado: ${new Date(SYSTEM_ACTIVATION).toISOString()}`);
             // Injeta o cliente WhatsApp no escape-strategy para canal WHATSAPP_ALT
             escapeStrategy.setWhatsAppClient(this.whatsapp);
             // Registra a reconexão / início de sessão no AUDIT_LOG
@@ -97,6 +104,14 @@ class SDRWhatsAppSystem {
         // Quando o cliente responde pelo WhatsApp
         this.whatsapp.on('message', async (msg) => {
             if (msg.from === 'status@broadcast') return;
+
+            // Ignorar mensagens anteriores à sessão atual (ex: mensagens acumuladas offline)
+            const msgTs = (msg.timestamp || 0) * 1000;
+            if (msgTs && msgTs < SYSTEM_ACTIVATION - 1000) {
+                logger.debug(`[SDR IA] Mensagem de ${msg.from} ignorada: timestamp (${new Date(msgTs).toISOString()}) anterior à sessão atual.`);
+                return;
+            }
+
             logger.info(`📥 Nova Mensagem Recebida de ${msg.from}: ${msg.body || `[${msg.type || 'midia'}]`}`);
             try {
                 const handled = await this._handleRemoteCommand(msg);
@@ -379,6 +394,7 @@ class SDRWhatsAppSystem {
         const headers = leads[0].map(h => String(h).toLowerCase());
         const idIdx = headers.findIndex(h => h.includes('id') || h === 'lead_id');
         const nomeIdx = headers.findIndex(h => h.includes('nome'));
+        const criadoIdx = headers.findIndex(h => h.includes('data_criacao') || h.includes('created_at') || h.includes('datacriacao'));
 
         for (let r = 1; r < leads.length; r++) {
             const row = leads[r];
@@ -386,6 +402,15 @@ class SDRWhatsAppSystem {
             const nome = row[nomeIdx] || 'Comercial';
 
             if (!telefone) continue;
+
+            // Ignorar leads criados antes da sessão atual
+            if (criadoIdx !== -1 && row[criadoIdx]) {
+                const leadCreatedAt = new Date(row[criadoIdx]).getTime();
+                if (Number.isFinite(leadCreatedAt) && leadCreatedAt < SYSTEM_ACTIVATION - 1000) {
+                    logger.debug(`[SDR IA] Lead ${telefone} ignorado: criado antes da sessão atual.`);
+                    continue;
+                }
+            }
 
             const interacoes = await crmSheets.getManyByLeadId(CRM_TABS.INTERACOES, telefone);
 
