@@ -1,0 +1,433 @@
+'use strict';
+
+const { OpenAI } = require('openai');
+const logger = require('../config/logger');
+const env = require('../config/env');
+const leadStateStore = require('./sdr-state-store');
+const remoteControl = require('./sdr-remote-control');
+const { loadSdrSystemPrompt } = require('../openai/sdr-prompt-loader');
+
+const DUE_FOLLOWUPS = [1, 5, 10];
+
+class SDRStateMachine {
+    constructor() {
+        this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        this.systemPrompt = loadSdrSystemPrompt();
+    }
+
+    async generateReply({
+        leadId,
+        leadMeta = {},
+        history = [],
+        currentText = '',
+        analysis = {},
+        currentDate = new Date(),
+        audioContext = '',
+        whatsappClient = null
+    }) {
+        const leadKey = this._normalizeLeadId(leadId);
+        const currentState = leadStateStore.setLeadInfo(leadKey, {
+            decisor_name: leadMeta.decisor_name || leadMeta.nome || '',
+            decisor_contact: leadMeta.decisor_contact || leadKey,
+            pain_points: this._normalizePainPoints(leadMeta.pain_points),
+            company: leadMeta.company || leadMeta.empresa || ''
+        });
+
+        leadStateStore.recordInbound(leadKey, currentText, {
+            source: 'whatsapp',
+            analysis,
+            audio: !!audioContext
+        });
+
+        const updatedState = this._deriveState(currentState, leadMeta, currentText, analysis);
+        leadStateStore.setFunnelStage(leadKey, updatedState.current_funnel_stage);
+
+        if (updatedState.addObjection) {
+            leadStateStore.addObjection(leadKey, updatedState.addObjection);
+        }
+
+        const promptPayload = {
+            conversation_history: this._buildConversationHistory(history, leadKey),
+            lead_metadata: {
+                lead_id: leadKey,
+                decisor_name: leadMeta.decisor_name || leadMeta.nome || '',
+                decisor_contact: leadMeta.decisor_contact || leadKey,
+                company: leadMeta.company || leadMeta.empresa || '',
+                pain_points: this._normalizePainPoints(leadMeta.pain_points)
+            },
+            current_funnel_stage: updatedState.current_funnel_stage,
+            follow_up_counter: updatedState.follow_up_counter,
+            objections_met: leadStateStore.getLead(leadKey).objections_met || [],
+            lead_info: leadStateStore.getLead(leadKey).lead_info || {},
+            current_datetime: currentDate.toISOString(),
+            current_message: currentText,
+            analysis,
+            audio_context: audioContext || ''
+        };
+
+        try {
+            const completion = await this.openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [
+                    { role: 'system', content: this.systemPrompt },
+                    {
+                        role: 'user',
+                        content: JSON.stringify(promptPayload, null, 2)
+                    }
+                ],
+                temperature: this._getCreativityTemperature(updatedState.current_funnel_stage)
+            });
+
+            const reply = String(completion.choices?.[0]?.message?.content || '').trim();
+            if (!reply) {
+                throw new Error('Resposta vazia da OpenAI');
+            }
+
+            leadStateStore.recordOutbound(leadKey, reply, {
+                source: 'openai',
+                stage: updatedState.current_funnel_stage
+            });
+
+            await this.evaluateForHumanTransition({
+                leadId: leadKey,
+                leadMeta,
+                currentText,
+                analysis,
+                stage: updatedState.current_funnel_stage,
+                whatsappClient,
+                reason: 'TRANSICAO_HUMANA'
+            });
+
+            return {
+                reply,
+                state: leadStateStore.getLead(leadKey),
+                stage: updatedState.current_funnel_stage
+            };
+        } catch (err) {
+            logger.error(`[SDR State] Falha ao gerar resposta: ${err.message}`);
+            await this._notifyAdminFailure({
+                leadId: leadKey,
+                leadMeta,
+                currentText,
+                analysis,
+                error: err,
+                whatsappClient
+            });
+
+            const fallbackReply = 'Obrigado pelo retorno. Pode me passar mais um detalhe para eu te orientar melhor?';
+            leadStateStore.recordOutbound(leadKey, fallbackReply, {
+                source: 'fallback',
+                error: err.message
+            });
+
+            return {
+                reply: fallbackReply,
+                state: leadStateStore.getLead(leadKey),
+                stage: updatedState.current_funnel_stage,
+                fallback: true
+            };
+        }
+    }
+
+    async generateFollowUp({
+        leadId,
+        leadMeta = {},
+        currentDate = new Date(),
+        followUpDay = 1,
+        whatsappClient = null
+    }) {
+        const leadKey = this._normalizeLeadId(leadId);
+        const currentState = leadStateStore.getLead(leadKey);
+        const promptPayload = {
+            conversation_history: currentState.history || [],
+            lead_metadata: {
+                lead_id: leadKey,
+                decisor_name: leadMeta.decisor_name || currentState.lead_info?.decisor_name || '',
+                decisor_contact: leadMeta.decisor_contact || currentState.lead_info?.decisor_contact || leadKey,
+                company: leadMeta.company || currentState.lead_info?.company || '',
+                pain_points: leadMeta.pain_points || currentState.lead_info?.pain_points || []
+            },
+            current_funnel_stage: currentState.current_funnel_stage,
+            follow_up_counter: followUpDay,
+            objections_met: currentState.objections_met || [],
+            lead_info: currentState.lead_info || {},
+            current_datetime: currentDate.toISOString(),
+            follow_up_reason: `D${followUpDay}`
+        };
+
+        const completion = await this.openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: this.systemPrompt },
+                { role: 'user', content: JSON.stringify(promptPayload, null, 2) }
+            ],
+            temperature: this._getCreativityTemperature(currentState.current_funnel_stage)
+        });
+
+        const reply = String(completion.choices?.[0]?.message?.content || '').trim();
+        if (!reply) {
+            throw new Error('Resposta vazia ao gerar follow-up');
+        }
+
+        leadStateStore.markFollowUpSent(leadKey, followUpDay);
+        leadStateStore.recordOutbound(leadKey, reply, {
+            source: 'scheduler',
+            followUpDay
+        });
+
+        return reply;
+    }
+
+    async evaluateForHumanTransition({ leadId, leadMeta = {}, currentText = '', analysis = {}, whatsappClient = null, reason = 'TRANSICAO_HUMANA' }) {
+        const leadKey = this._normalizeLeadId(leadId);
+        const currentState = leadStateStore.getLead(leadKey);
+        const stage = currentState.current_funnel_stage || 'TOP_OF_FUNNEL';
+
+        if (currentState.human_transition_notified_at) {
+            return false;
+        }
+
+        const shouldNotify = this._shouldEscalateToHuman({ currentText, analysis, leadMeta, stage });
+
+        if (!shouldNotify) return false;
+
+        leadStateStore.markHumanTransitionNotified(leadKey);
+        await this._notifyAdminPayload({
+            leadId: leadKey,
+            leadMeta,
+            reason,
+            currentText,
+            analysis,
+            whatsappClient,
+            action: 'LIGAR_AGORA'
+        });
+        return true;
+    }
+
+    async runFollowUpScan({ whatsappClient }) {
+        const dueLeads = leadStateStore.getDueFollowUps();
+        const results = [];
+
+        for (const item of dueLeads) {
+            try {
+                const leadId = item.leadId;
+                const leadState = item.leadState;
+                const leadMeta = leadState.lead_info || {};
+                const contact = leadMeta.decisor_contact || leadId;
+
+                for (const day of item.dueDays) {
+                    const reply = await this.generateFollowUp({
+                        leadId,
+                        leadMeta,
+                        followUpDay: day,
+                        whatsappClient
+                    });
+
+                    if (whatsappClient && contact) {
+                        await whatsappClient.sendMessage(`${contact}@c.us`, reply);
+                    }
+
+                    if (day === 10) {
+                        await this._notifyAdminPayload({
+                            leadId,
+                            leadMeta,
+                            reason: 'D10',
+                            currentText: reply,
+                            whatsappClient,
+                            action: 'LIGAR_AGORA'
+                        });
+                    }
+
+                    results.push({ leadId, day, sent: true });
+                }
+            } catch (err) {
+                logger.error(`[SDR State] Falha no follow-up do lead ${item.leadId}: ${err.message}`);
+                await this._notifyAdminFailure({
+                    leadId: item.leadId,
+                    leadMeta: item.leadState?.lead_info || {},
+                    currentText: '',
+                    analysis: { tipo: 'followup_scan' },
+                    error: err,
+                    whatsappClient
+                });
+                results.push({ leadId: item.leadId, error: err.message });
+            }
+        }
+
+        return results;
+    }
+
+    _deriveState(currentState, leadMeta, currentText, analysis) {
+        const normalizedText = String(currentText || '').toLowerCase();
+        const objectionsMet = new Set([...(currentState.objections_met || [])]);
+
+        if (analysis && analysis.objecao) {
+            objectionsMet.add(String(analysis.objecao).trim());
+        }
+
+        if (this._containsAny(normalizedText, ['não tenho interesse', 'nao tenho interesse', 'sem interesse', 'não quero', 'nao quero'])) {
+            objectionsMet.add('nao_interesse');
+        }
+
+        if (this._containsAny(normalizedText, ['email', 'e-mail'])) {
+            objectionsMet.add('enviar_email');
+        }
+
+        if (this._containsAny(normalizedText, ['fornecedor', 'agência', 'agencia'])) {
+            objectionsMet.add('fornecedor_existente');
+        }
+
+        const qualificationComplete = this._isQualificationComplete({ currentText, leadMeta, analysis });
+        const humanRequest = this._isHumanRequest(normalizedText, analysis);
+        const complexObjection = this._isComplexObjection(normalizedText, analysis);
+
+        const nextStage = qualificationComplete
+            ? 'BOTTOM_OF_FUNNEL'
+            : (currentState.current_funnel_stage === 'BOTTOM_OF_FUNNEL'
+                ? 'BOTTOM_OF_FUNNEL'
+                : (currentState.history && currentState.history.length > 0
+                    ? 'MIDDLE_OF_FUNNEL'
+                    : 'TOP_OF_FUNNEL'));
+
+        return {
+            current_funnel_stage: nextStage,
+            follow_up_counter: 0,
+            addObjection: objectionsMet.size ? Array.from(objectionsMet).pop() : '',
+            qualificationComplete,
+            humanRequest,
+            complexObjection
+        };
+    }
+
+    _isQualificationComplete({ currentText, leadMeta, analysis }) {
+        const text = String(currentText || '').toLowerCase();
+        if (leadMeta && (leadMeta.decisor_contact || leadMeta.decisor_name)) {
+            if (this._containsAny(text, ['agenda', 'marcar', 'reunião', 'reuniao', 'call', 'horário', 'horario', 'segunda', 'terça', 'terca'])) {
+                return true;
+            }
+        }
+
+        if (analysis && String(analysis.tipo || '').toLowerCase() === 'resposta_positiva') {
+            if (this._containsAny(text, ['agenda', 'marcar', 'reunião', 'reuniao', 'call', 'horário', 'horario'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    _isHumanRequest(text, analysis) {
+        const humanHints = [
+            'falar com humano',
+            'quero falar com alguém',
+            'quero falar com alguem',
+            'pessoa real',
+            'atendente',
+            'humano',
+            'ligar',
+            'me liga',
+            'me ligue',
+            'telefone',
+            'call'
+        ];
+
+        return this._containsAny(text, humanHints) || String(analysis && analysis.tipo || '').toLowerCase() === 'resposta_positiva' && this._containsAny(text, ['ligar', 'telefone', 'call']);
+    }
+
+    _isComplexObjection(text, analysis) {
+        const complexHints = ['jurídico', 'juridico', 'concorrente', 'contrato', 'integracao', 'integração', 'preco', 'preço', 'budget', 'orcamento', 'orçamento'];
+        return this._containsAny(text, complexHints) || String(analysis && analysis.objecao || '').toLowerCase() === 'sem_budget';
+    }
+
+    _shouldEscalateToHuman({ currentText, analysis, leadMeta, stage }) {
+        return this._isHumanRequest(String(currentText || '').toLowerCase(), analysis)
+            || this._isComplexObjection(String(currentText || '').toLowerCase(), analysis)
+            || this._isQualificationComplete({ currentText, leadMeta, analysis })
+            || stage === 'BOTTOM_OF_FUNNEL';
+    }
+
+    async _notifyAdminPayload({ leadId, leadMeta = {}, reason, currentText, analysis = {}, whatsappClient, action = 'LIGAR_AGORA' }) {
+        const payload = {
+            to: env.SDR_ADMIN_WHATSAPP_NUMBERS || env.SDR_ADMIN_WHATSAPP_NUMBER || 'ADMIN_NUMBER_VITHOR',
+            message: [
+                '🚨 ALERTA SDR IA: Intervenção Necessária',
+                `Lead: ${leadMeta.decisor_name || leadMeta.nome || leadId || 'desconhecido'}`,
+                `Empresa: ${leadMeta.company || leadMeta.empresa || 'não informada'}`,
+                `Motivo: ${reason || 'TRANSICAO_HUMANA'}`,
+                `Resumo: ${this._buildSummary({ currentText, analysis, leadMeta })}`
+            ].join('\n'),
+            action
+        };
+
+        if (whatsappClient) {
+            await remoteControl.notifyAdminPayload(whatsappClient, payload);
+            return true;
+        }
+
+        return false;
+    }
+
+    async _notifyAdminFailure({ leadId, leadMeta = {}, currentText, analysis = {}, error, whatsappClient }) {
+        const payload = {
+            to: env.SDR_ADMIN_WHATSAPP_NUMBERS || env.SDR_ADMIN_WHATSAPP_NUMBER || 'ADMIN_NUMBER_VITHOR',
+            message: [
+                '🚨 ALERTA SDR IA: Falha na Geração',
+                `Lead: ${leadMeta.decisor_name || leadMeta.nome || leadId || 'desconhecido'}`,
+                `Empresa: ${leadMeta.company || leadMeta.empresa || 'não informada'}`,
+                'Motivo: ERRO_GERACAO',
+                `Resumo: ${this._buildSummary({ currentText, analysis, leadMeta, error })}`
+            ].join('\n'),
+            action: 'LIGAR_AGORA'
+        };
+
+        if (whatsappClient) {
+            await remoteControl.notifyAdminPayload(whatsappClient, payload);
+        }
+    }
+
+    _buildSummary({ currentText, analysis, leadMeta, error }) {
+        const parts = [
+            currentText ? `msg=${String(currentText).slice(0, 120)}` : '',
+            analysis && analysis.tipo ? `tipo=${analysis.tipo}` : '',
+            analysis && analysis.objecao ? `objeção=${analysis.objecao}` : '',
+            leadMeta && leadMeta.decisor_contact ? `contato=${leadMeta.decisor_contact}` : '',
+            error ? `erro=${error.message}` : ''
+        ].filter(Boolean);
+
+        return parts.length ? parts.join(' | ') : 'sem detalhes';
+    }
+
+    _buildConversationHistory(history, leadId) {
+        if (Array.isArray(history) && history.length) {
+            return history;
+        }
+
+        const lead = leadStateStore.getLead(leadId);
+        return lead.history || [];
+    }
+
+    _getCreativityTemperature(stage) {
+        const normalized = String(stage || '').toUpperCase();
+        if (normalized === 'TOP_OF_FUNNEL') return 0.75;
+        if (normalized === 'MIDDLE_OF_FUNNEL') return 0.66;
+        if (normalized === 'BOTTOM_OF_FUNNEL') return 0.56;
+        return 0.64;
+    }
+
+    _normalizeLeadId(leadId) {
+        return String(leadId || '').replace(/\D/g, '');
+    }
+
+    _normalizePainPoints(value) {
+        if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
+        if (!value) return [];
+        return String(value).split(',').map(v => v.trim()).filter(Boolean);
+    }
+
+    _containsAny(text, hints) {
+        const normalized = String(text || '').toLowerCase();
+        return hints.some(hint => normalized.includes(String(hint).toLowerCase()));
+    }
+}
+
+module.exports = new SDRStateMachine();

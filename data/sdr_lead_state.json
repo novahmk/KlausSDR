@@ -1,0 +1,2294 @@
+{
+  "167255035912336": {
+    "current_funnel_stage": "TOP_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "167255035912336",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:21:58.627Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:00.037Z",
+        "text": "Olá! Recebemos sua mensagem, mas parece que está vazia. Se precisar de alguma informação sobre nossos serviços, estou aqui para ajudar. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T19:22:00.037Z",
+    "last_inbound_at": "2026-05-11T19:21:58.627Z",
+    "last_outbound_at": "2026-05-11T19:22:00.037Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:13.597Z"
+  },
+  "138633474473991": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto",
+      "qualé_interesse"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "138633474473991",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:20.616Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:23.168Z",
+        "text": "Olá! Espero que esteja bem. Estou aqui para ajudar com qualquer dúvida ou informação que você possa precisar. Sinta-se à vontade para me enviar uma mensagem quando estiver pronto(a). 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.499Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "qualé_interesse",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.009Z",
+        "text": "Olá! Parece que ainda não tivemos a oportunidade de nos conectar. Estou aqui para ajudar com qualquer dúvida ou informação que você possa precisar sobre como podemos apoiar sua empresa. Se preferir, podemos marcar uma conversa com um dos nossos especialistas para discutir suas necessidades específicas. Basta me avisar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.009Z",
+    "last_inbound_at": "2026-05-11T22:42:00.499Z",
+    "last_outbound_at": "2026-05-11T22:42:03.009Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.009Z"
+  },
+  "135906153521212": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nao_disponivel"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "135906153521212",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:21.523Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:23.834Z",
+        "text": "Olá! 👋 Parece que houve algum problema com a sua mensagem. Estamos aqui para ajudar! Caso tenha alguma dúvida ou precise de informações sobre nossos serviços, fique à vontade para nos contar. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:59.293Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nao_disponivel",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:01.268Z",
+        "text": "Olá! Parece que suas mensagens estão chegando vazias. Se precisar de ajuda ou informações sobre nossos serviços, por favor, tente nos enviar uma mensagem novamente ou nos avise se prefere que um de nossos especialistas entre em contato com você. Estamos aqui para ajudar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:01.268Z",
+    "last_inbound_at": "2026-05-11T22:41:59.293Z",
+    "last_outbound_at": "2026-05-11T22:42:01.268Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:01.268Z"
+  },
+  "104647482163340": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "qualé_interesse"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "104647482163340",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:21.580Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:22.944Z",
+        "text": "Olá! Espero que você esteja bem. Gostaria de saber como posso ajudá-lo hoje. Se tiver alguma dúvida ou interesse em nossos serviços, estou à disposição para conversar!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:56.411Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "qualé_interesse",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:58.302Z",
+        "text": "Olá! Parece que você está com alguma dúvida ou quer saber mais sobre o que fazemos. Estou aqui para ajudar! Podemos agendar um horário para conversarmos com mais calma?",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:58.302Z",
+    "last_inbound_at": "2026-05-11T22:41:56.411Z",
+    "last_outbound_at": "2026-05-11T22:41:58.302Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:58.302Z"
+  },
+  "177683350716449": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nenhuma"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "177683350716449",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:21.636Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nenhuma",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:22.846Z",
+        "text": "Olá! Estou aqui para ajudar e responder às suas perguntas sobre nossos serviços. Se precisar de algo específico, fique à vontade para me contar!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.078Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:58.607Z",
+        "text": "Oi Lead! Parece que suas mensagens estão chegando vazias. Se preferir, podemos continuar a conversa por aqui para que eu possa te ajudar da melhor forma. Se tiver alguma dúvida ou interesse específico, é só me avisar!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:58.607Z",
+    "last_inbound_at": "2026-05-11T22:41:57.078Z",
+    "last_outbound_at": "2026-05-11T22:41:58.607Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:58.607Z"
+  },
+  "225863874433208": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "225863874433208",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:21.663Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:22.845Z",
+        "text": "Olá! Espero que esteja tudo bem com você. Caso precise de alguma informação ou queira saber mais sobre como podemos ajudar, estou à disposição. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.866Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:59.635Z",
+        "text": "Olá! Parece que não conseguimos nos conectar ainda. Se preferir, posso entrar em contato de outra forma ou em um horário mais conveniente. Estou aqui para ajudar quando você precisar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:59.635Z",
+    "last_inbound_at": "2026-05-11T22:41:57.866Z",
+    "last_outbound_at": "2026-05-11T22:41:59.635Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:59.635Z"
+  },
+  "71026293649640": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "71026293649640",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:21.750Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:24.493Z",
+        "text": "Olá! Tudo bem? 😊 Notei que você entrou em contato, mas não consegui ver uma mensagem específica. Se precisar de ajuda ou tiver alguma dúvida, estou aqui para ajudar!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.605Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:02.551Z",
+        "text": "Oi! Parece que suas mensagens não estão chegando até mim. Caso você tenha alguma dúvida ou precise de assistência, sinta-se à vontade para tentar enviar novamente. Estou aqui para ajudar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:02.551Z",
+    "last_inbound_at": "2026-05-11T22:42:00.605Z",
+    "last_outbound_at": "2026-05-11T22:42:02.551Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:02.551Z"
+  },
+  "133887267233905": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "133887267233905",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:21.784Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:23.065Z",
+        "text": "Olá! Tudo bem? Gostaria de saber se há algo em que podemos ajudar ou se você tem alguma dúvida sobre nossos serviços. Fico à disposição para qualquer esclarecimento.",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:35.080Z",
+        "text": "Olá, seja bem vindo(a)! Meu nome é Tayná vou te dar todo suporte necessário.\nConta para mim qual região mais te incomoda ou quantos kg é o nosso objetivo?",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "positivo",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:37.653Z",
+        "text": "Olá Tayná! Muito prazer em falar com você. Para que possamos oferecer o melhor suporte, você poderia me contar um pouco mais sobre seus objetivos e o que espera alcançar? Assim, poderemos indicar a melhor solução para você.",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:59.910Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:02.041Z",
+        "text": "Oi Tayná! Parece que a última mensagem não foi enviada corretamente. Estou aqui para ajudar no que precisar. Se puder compartilhar um pouco sobre seus objetivos ou qualquer dúvida que tenha, vou adorar ajudar a encontrar a melhor solução para você!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:02.041Z",
+    "last_inbound_at": "2026-05-11T22:41:59.910Z",
+    "last_outbound_at": "2026-05-11T22:42:02.041Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:02.041Z"
+  },
+  "27827764211720": {
+    "current_funnel_stage": "TOP_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Vithor Meyer",
+      "decisor_contact": "27827764211720",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.013Z",
+        "text": "Olá",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:23.005Z",
+        "text": "Olá, Vithor! Como posso ajudar você hoje? Estou aqui para esclarecer qualquer dúvida que você possa ter.",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T19:22:23.005Z",
+    "last_inbound_at": "2026-05-11T19:22:22.013Z",
+    "last_outbound_at": "2026-05-11T19:22:23.005Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:13.597Z"
+  },
+  "151419659227383": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "qualé_interesse"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "151419659227383",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.064Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:23.762Z",
+        "text": "Olá! Espero que você esteja bem. Estou aqui para ajudar com qualquer dúvida que você tenha sobre nossos serviços. Quando tiver um momento, sinta-se à vontade para me enviar uma mensagem!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:37.341Z",
+        "text": "Olá! Eu posso sim te explicar como funciona o nosso tratamento! Mas me conta, o que exatamente te incomoda?",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "positivo",
+            "tipo": "pergunta",
+            "objecao": "qualé_interesse",
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:38.250Z",
+        "text": "Claro, Magrass! Nosso tratamento é focado em oferecer resultados personalizados e eficazes, dependendo das suas necessidades específicas. Se puder compartilhar um pouco mais sobre o que você gostaria de melhorar, posso te explicar como podemos ajudar. Fico à disposição!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.085Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:02.506Z",
+        "text": "Oi, tudo bem? Estou aqui para ajudar com qualquer dúvida que você tenha sobre nossos serviços. Se precisar de mais informações ou quiser compartilhar suas preocupações, estou à disposição!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:02.506Z",
+    "last_inbound_at": "2026-05-11T22:42:01.085Z",
+    "last_outbound_at": "2026-05-11T22:42:02.506Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:02.506Z"
+  },
+  "29747413311638": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nao_resposta"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "29747413311638",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.066Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nao_resposta",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:23.691Z",
+        "text": "Olá! Espero que você esteja bem. Gostaria de saber se há algo específico sobre o qual posso te ajudar hoje. Estou aqui para facilitar o que você precisar. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.618Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:59.029Z",
+        "text": "Oi! Percebi que ainda não conseguimos nos conectar. Se precisar de qualquer informação sobre nossos serviços ou tiver alguma dúvida, estou à disposição. Caso prefira, podemos agendar um horário para uma conversa mais detalhada. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:59.029Z",
+    "last_inbound_at": "2026-05-11T22:41:57.618Z",
+    "last_outbound_at": "2026-05-11T22:41:59.029Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:59.029Z"
+  },
+  "77907166793729": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "77907166793729",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.226Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.161Z",
+        "text": "Olá! Espero que você esteja bem. Aqui é o time da Klaus, e estamos curiosos para saber mais sobre você e sua empresa. Se precisar de algo específico ou quiser compartilhar como podemos ajudar, fique à vontade para nos contar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:02.296Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:13.165Z",
+        "text": "Obrigado pelo retorno. Pode me passar mais um detalhe para eu te orientar melhor?",
+        "meta": {
+          "source": "fallback",
+          "error": "429 Rate limit reached for gpt-4o in organization org-hZVKPrPJAFLEyr1yAgYWK9RP on tokens per min (TPM): Limit 30000, Used 30000, Requested 736. Please try again in 1.472s. Visit https://platform.openai.com/account/rate-limits to learn more."
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:13.165Z",
+    "last_inbound_at": "2026-05-11T22:42:02.296Z",
+    "last_outbound_at": "2026-05-11T22:42:13.165Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:13.165Z"
+  },
+  "159231751770247": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nenhuma"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "159231751770247",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.711Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nenhuma",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.057Z",
+        "text": "Olá! Espero que esteja bem. Sou da Klaus e gostaria de saber como posso ajudar você ou sua empresa. Caso tenha alguma dúvida ou interesse, estou à disposição para conversar.",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.174Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:02.834Z",
+        "text": "Olá! Parece que nossas mensagens não estão chegando até você. Se precisar de alguma informação ou ajuda específica, estou aqui para ajudar. Caso prefira, podemos agendar uma breve conversa para entender melhor suas necessidades e como podemos colaborar.",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:02.834Z",
+    "last_inbound_at": "2026-05-11T22:42:01.174Z",
+    "last_outbound_at": "2026-05-11T22:42:02.834Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:02.834Z"
+  },
+  "147261644390421": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "147261644390421",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.721Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:24.095Z",
+        "text": "Olá! Espero que você esteja bem. Como posso te ajudar hoje? 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.490Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:59.322Z",
+        "text": "Olá! Parece que não conseguimos nos conectar ainda. Estou aqui para ajudar com qualquer dúvida ou informação que você precise. Se preferir, podemos marcar um horário para conversarmos com mais calma. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:59.322Z",
+    "last_inbound_at": "2026-05-11T22:41:57.490Z",
+    "last_outbound_at": "2026-05-11T22:41:59.322Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:59.322Z"
+  },
+  "196357432320218": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "196357432320218",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:22.896Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:24.988Z",
+        "text": "Olá! Aqui é da Klaus. Vi que você nos contatou recentemente, mas a mensagem veio vazia. Gostaria de saber como posso ajudar você da melhor forma. Se preferir, estou aqui para responder qualquer dúvida ou fornecer mais informações sobre os nossos serviços!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:02.076Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:12.968Z",
+        "text": "Obrigado pelo retorno. Pode me passar mais um detalhe para eu te orientar melhor?",
+        "meta": {
+          "source": "fallback",
+          "error": "429 Rate limit reached for gpt-4o in organization org-hZVKPrPJAFLEyr1yAgYWK9RP on tokens per min (TPM): Limit 30000, Used 30000, Requested 732. Please try again in 1.464s. Visit https://platform.openai.com/account/rate-limits to learn more."
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:12.968Z",
+    "last_inbound_at": "2026-05-11T22:42:02.076Z",
+    "last_outbound_at": "2026-05-11T22:42:12.968Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:12.968Z"
+  },
+  "218154441683174": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "218154441683174",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.047Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:24.963Z",
+        "text": "Olá! Espero que você esteja bem. Estou aqui para ajudar com qualquer dúvida que você tenha sobre nossos serviços. Se precisar de algo específico ou tiver alguma questão, é só me avisar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.624Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:58.991Z",
+        "text": "Oi! Parece que tivemos algumas mensagens em branco. Se precisar de algo ou quiser mais informações sobre nossos serviços, estou aqui para ajudar. Fique à vontade para me dizer como posso ser útil! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:58.991Z",
+    "last_inbound_at": "2026-05-11T22:41:57.624Z",
+    "last_outbound_at": "2026-05-11T22:41:58.991Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:58.991Z"
+  },
+  "17927294210217": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nenhuma"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "17927294210217",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.237Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.000Z",
+        "text": "Olá! Notei que sua mensagem veio em branco. Posso te ajudar com alguma informação sobre nossos serviços? Fique à vontade para compartilhar qualquer dúvida que você tenha. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.519Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nenhuma",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.212Z",
+        "text": "Oi! Parece que sua mensagem veio em branco novamente. Se precisar de qualquer ajuda ou informação sobre o que oferecemos, estou aqui para ajudar. Não hesite em me mandar suas dúvidas ou preocupações. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.212Z",
+    "last_inbound_at": "2026-05-11T22:42:01.519Z",
+    "last_outbound_at": "2026-05-11T22:42:03.212Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.213Z"
+  },
+  "240471142101044": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "240471142101044",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.290Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:24.928Z",
+        "text": "Olá! Espero que esteja bem. Caso tenha alguma dúvida ou precise de informações sobre nossos serviços, estou à disposição para ajudar. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.397Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.146Z",
+        "text": "Oi Lead! Parece que não conseguimos nos conectar ainda. Se houver algo específico em que você está interessado ou se precisar de informações sobre como podemos ajudar sua empresa, estou aqui para ajudar. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.146Z",
+    "last_inbound_at": "2026-05-11T22:42:01.397Z",
+    "last_outbound_at": "2026-05-11T22:42:03.146Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.146Z"
+  },
+  "1151168737458": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nao_interesse"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "1151168737458",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.330Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.819Z",
+        "text": "Olá! Aqui é da Klaus. Estou por aqui para ajudar você a melhorar a experiência de atendimento ao cliente da sua empresa. Se precisar de algo em específico ou tiver alguma dúvida, é só me chamar. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.704Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nao_interesse",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:00.137Z",
+        "text": "Olá! Percebi que ainda não tivemos uma troca de mensagens. Caso você tenha qualquer dúvida ou curiosidade sobre como a Klaus pode ajudar sua empresa, estou aqui para ajudar. Se preferir, posso agendar uma breve ligação com um dos nossos especialistas. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:00.137Z",
+    "last_inbound_at": "2026-05-11T22:41:57.704Z",
+    "last_outbound_at": "2026-05-11T22:42:00.137Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:00.137Z"
+  },
+  "31297896484890": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "não aplicável",
+      "sem_contacto"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "31297896484890",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.425Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "não aplicável",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.208Z",
+        "text": "Olá! Espero que você esteja bem. Estou aqui para ajudar com quaisquer dúvidas ou informações que você precise. Se puder compartilhar um pouco mais sobre o que você está procurando ou qualquer desafio que sua empresa possa estar enfrentando, ficarei feliz em ajudar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.776Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.612Z",
+        "text": "Oi! Parece que não conseguimos nos conectar ainda. Estou aqui para ajudar e gostaria de entender melhor como posso ser útil para você ou sua empresa. Se preferir, podemos agendar uma ligação rápida para conversar sobre suas necessidades. O que acha? 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.612Z",
+    "last_inbound_at": "2026-05-11T22:42:00.776Z",
+    "last_outbound_at": "2026-05-11T22:42:03.612Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.612Z"
+  },
+  "171232259510434": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "171232259510434",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.535Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.366Z",
+        "text": "Olá! Aqui é o time da Klaus. Notei que você nos enviou uma mensagem, mas não conseguimos vê-la. Se puder nos contar um pouco mais sobre suas necessidades ou dúvidas, ficaremos felizes em ajudar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:59.008Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:00.317Z",
+        "text": "Parece que a mensagem não veio corretamente. Se precisar de alguma ajuda, estou aqui para esclarecer suas dúvidas. Caso prefira, podemos agendar uma conversa para entender melhor suas necessidades.",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:00.317Z",
+    "last_inbound_at": "2026-05-11T22:41:59.008Z",
+    "last_outbound_at": "2026-05-11T22:42:00.317Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:00.317Z"
+  },
+  "86178938224768": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "86178938224768",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.914Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.669Z",
+        "text": "Olá! 😊 Como posso ajudar você hoje? Se precisar de informações sobre nossos serviços, estou à disposição para esclarecer todas as suas dúvidas.",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.366Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:02.764Z",
+        "text": "Olá! Parece que não conseguimos nos conectar ainda. Se houver algo específico que você gostaria de saber sobre nossos serviços, estou aqui para ajudar. Se preferir falar com alguém da nossa equipe, posso providenciar isso também. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:02.764Z",
+    "last_inbound_at": "2026-05-11T22:42:00.366Z",
+    "last_outbound_at": "2026-05-11T22:42:02.764Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:02.764Z"
+  },
+  "71330833678371": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "qualé_interesse"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "71330833678371",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:23.926Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.506Z",
+        "text": "Olá! Espero que esteja bem. Estou aqui para ajudar com qualquer dúvida que possa ter sobre como a Klaus pode beneficiar você e sua empresa. Sinta-se à vontade para perguntar ou compartilhar um pouco mais sobre suas necessidades.",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.966Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "qualé_interesse",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.660Z",
+        "text": "Oi, tudo bem? Estou aqui para ajudar. Se tiver alguma dúvida específica ou se precisar entender melhor como a Klaus pode trazer benefícios para você, estou à disposição para explicar. Fique à vontade para me contar mais sobre o que você está buscando!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.660Z",
+    "last_inbound_at": "2026-05-11T22:42:00.966Z",
+    "last_outbound_at": "2026-05-11T22:42:03.660Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.660Z"
+  },
+  "113048085885024": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "113048085885024",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.027Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.348Z",
+        "text": "Olá! Espero que esteja tudo bem com você. Caso queira saber mais sobre como podemos ajudar, estou aqui para esclarecer suas dúvidas. Fique à vontade para me contar um pouco mais sobre suas necessidades ou qualquer questão específica que você tenha! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.953Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:12.726Z",
+        "text": "Obrigado pelo retorno. Pode me passar mais um detalhe para eu te orientar melhor?",
+        "meta": {
+          "source": "fallback",
+          "error": "429 Rate limit reached for gpt-4o in organization org-hZVKPrPJAFLEyr1yAgYWK9RP on tokens per min (TPM): Limit 30000, Used 30000, Requested 732. Please try again in 1.464s. Visit https://platform.openai.com/account/rate-limits to learn more."
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:12.726Z",
+    "last_inbound_at": "2026-05-11T22:42:01.953Z",
+    "last_outbound_at": "2026-05-11T22:42:12.726Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:12.726Z"
+  },
+  "208727256895625": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "208727256895625",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.090Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:25.809Z",
+        "text": "Olá! Notei que você entrou em contato, mas não enviou uma mensagem. Estou aqui para ajudar com qualquer dúvida que você tenha sobre nossos serviços. Sinta-se à vontade para me contar como posso ajudar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.828Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:00.052Z",
+        "text": "Olá novamente! Parece que suas mensagens estão chegando em branco. Se precisar de ajuda ou tiver alguma dúvida, estou aqui para ajudar! Caso prefira, podemos marcar um horário para conversar por telefone. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:00.052Z",
+    "last_inbound_at": "2026-05-11T22:41:57.828Z",
+    "last_outbound_at": "2026-05-11T22:42:00.052Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:00.052Z"
+  },
+  "111704012775576": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "111704012775576",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.204Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.180Z",
+        "text": "Olá! Notei que sua mensagem chegou em branco. Estou aqui para ajudar com qualquer dúvida que você tenha sobre nossos serviços. Se precisar de algo específico, é só me avisar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:03.018Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:12.866Z",
+        "text": "Obrigado pelo retorno. Pode me passar mais um detalhe para eu te orientar melhor?",
+        "meta": {
+          "source": "fallback",
+          "error": "429 Rate limit reached for gpt-4o in organization org-hZVKPrPJAFLEyr1yAgYWK9RP on tokens per min (TPM): Limit 30000, Used 30000, Requested 714. Please try again in 1.428s. Visit https://platform.openai.com/account/rate-limits to learn more."
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:12.866Z",
+    "last_inbound_at": "2026-05-11T22:42:03.018Z",
+    "last_outbound_at": "2026-05-11T22:42:12.866Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:12.866Z"
+  },
+  "153944915456069": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "153944915456069",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.614Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.433Z",
+        "text": "Oi! Espero que esteja tudo bem. Notei que você nos enviou uma mensagem, mas parece que veio em branco. Posso ajudar em algo específico? Estou à disposição para qualquer dúvida que você tenha sobre nossos serviços!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.095Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:41:58.770Z",
+        "text": "Olá! Parece que suas mensagens estão chegando em branco. Se precisar de ajuda ou tiver alguma dúvida, estou aqui para ajudar. Caso prefira, podemos agendar uma conversa por telefone para facilitar a comunicação. O que acha?",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:41:58.770Z",
+    "last_inbound_at": "2026-05-11T22:41:57.095Z",
+    "last_outbound_at": "2026-05-11T22:41:58.770Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:41:58.771Z"
+  },
+  "99398881153119": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "99398881153119",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.622Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.457Z",
+        "text": "Olá! Notei que você enviou uma mensagem vazia. Se precisar de informações ou tiver alguma dúvida sobre nossos serviços, estou aqui para ajudar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.613Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:04.728Z",
+        "text": "Olá! Parece que suas mensagens estão chegando em branco. Caso precise de ajuda ou tenha interesse em saber mais sobre como podemos ajudar, estou à disposição. Se preferir, posso encaminhar seu contato para um especialista que poderá atender suas necessidades de maneira mais direta. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:04.728Z",
+    "last_inbound_at": "2026-05-11T22:42:01.613Z",
+    "last_outbound_at": "2026-05-11T22:42:04.728Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:04.728Z"
+  },
+  "51042012160131": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "nenhuma"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "51042012160131",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.716Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nenhuma",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:27.961Z",
+        "text": "Olá! Espero que você esteja bem. Estou aqui para ajudar com qualquer dúvida ou informação sobre nossos serviços. Por favor, me avise como posso ajudar!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.193Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:02.757Z",
+        "text": "Olá novamente! Parece que houve algum problema com a sua mensagem anterior. Estou aqui para ajudar e responder qualquer dúvida que você tenha. Se preferir, podemos agendar um horário para uma conversa mais detalhada. Por favor, me avise como posso auxiliá-lo!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:02.757Z",
+    "last_inbound_at": "2026-05-11T22:42:00.193Z",
+    "last_outbound_at": "2026-05-11T22:42:02.757Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:02.757Z"
+  },
+  "195760482201820": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "qualé_interesse"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "195760482201820",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.876Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.452Z",
+        "text": "Olá! Espero que você esteja bem. Sou da equipe da Klaus e estou aqui para ajudar. Se precisar de qualquer informação ou tiver alguma dúvida, fique à vontade para me contar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:23:00.284Z",
+        "text": "Olá! Prazer, me chamo Ana, sou assistente virtual da Magrass Medianeira, estou muito feliz com seu contato. 😊 Qual seu nome e de qual cidade você é?",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "positivo",
+            "tipo": "nao_resposta",
+            "objecao": "qualé_interesse",
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:00.777Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.914Z",
+        "text": "Oi Ana! Que bom falar com você. Sou parte da equipe Klaus e estou aqui para ajudar a Magrass Medianeira a melhorar o atendimento ao cliente. Temos várias soluções que podem tornar o seu trabalho ainda mais eficiente. Você gostaria de saber mais sobre como podemos ajudar? 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.914Z",
+    "last_inbound_at": "2026-05-11T22:42:00.777Z",
+    "last_outbound_at": "2026-05-11T22:42:03.914Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.914Z"
+  },
+  "275965053825116": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [
+      "sem_contacto",
+      "qualé_interesse",
+      "nenhuma"
+    ],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "275965053825116",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.881Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "sem_contacto",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.564Z",
+        "text": "Olá! Espero que esteja bem. Estou aqui para ajudar com qualquer dúvida que você possa ter sobre nossos serviços. Se precisar de informações específicas, é só me avisar. Estou à disposição!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:44.116Z",
+        "text": "Olá, tudo bem? Que bom que você decidiu se cuidar! 😊\nAgora me conta uma coisa, você quer:\n1- Emagrecer? Quantos kilos?\n2- Eliminar gordura localizada? Qual região?",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "positivo",
+            "tipo": "nao_resposta",
+            "objecao": "qualé_interesse",
+            "proximidadeICP": "medio"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:47.488Z",
+        "text": "Que bom que você está interessado em cuidar da sua saúde! 😊 Na nossa clínica, oferecemos soluções personalizadas para emagrecimento e eliminação de gordura localizada. Para podermos te ajudar melhor, você poderia me dizer qual dessas opções mais te interessa e quais são seus objetivos? Assim, posso te fornecer informações mais detalhadas e alinhadas com suas necessidades.",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:02.400Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": "nenhuma",
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:08.041Z",
+        "text": "Obrigado pelo retorno. Pode me passar mais um detalhe para eu te orientar melhor?",
+        "meta": {
+          "source": "fallback",
+          "error": "429 Rate limit reached for gpt-4o in organization org-hZVKPrPJAFLEyr1yAgYWK9RP on tokens per min (TPM): Limit 30000, Used 30000, Requested 1019. Please try again in 2.038s. Visit https://platform.openai.com/account/rate-limits to learn more."
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:08.041Z",
+    "last_inbound_at": "2026-05-11T22:42:02.400Z",
+    "last_outbound_at": "2026-05-11T22:42:08.041Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:08.041Z"
+  },
+  "263969109500100": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "263969109500100",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.934Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.502Z",
+        "text": "Olá! Parece que não recebemos sua mensagem. Estou aqui para ajudar com qualquer dúvida ou informação que você precise sobre o Klaus. Sinta-se à vontade para nos chamar! 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:41:57.904Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:00.928Z",
+        "text": "Oi! Parece que ainda não conseguimos nos comunicar. Caso tenha alguma dúvida ou precise de informações sobre como o Klaus pode ajudar, estou aqui para ajudar. Se preferir, podemos agendar uma conversa com um de nossos especialistas. 😊",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:00.928Z",
+    "last_inbound_at": "2026-05-11T22:41:57.904Z",
+    "last_outbound_at": "2026-05-11T22:42:00.928Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:00.928Z"
+  },
+  "47197848600584": {
+    "current_funnel_stage": "MIDDLE_OF_FUNNEL",
+    "follow_up_counter": 0,
+    "objections_met": [],
+    "lead_info": {
+      "decisor_name": "Lead",
+      "decisor_contact": "47197848600584",
+      "pain_points": [],
+      "company": ""
+    },
+    "history": [
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T19:22:24.962Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T19:22:26.653Z",
+        "text": "Olá! Notei que sua mensagem veio em branco. Estou aqui para te ajudar com qualquer dúvida que tenha sobre nossos serviços. Fique à vontade para me contar um pouco mais sobre o que você está buscando!",
+        "meta": {
+          "source": "openai",
+          "stage": "TOP_OF_FUNNEL"
+        }
+      },
+      {
+        "direction": "inbound",
+        "timestamp": "2026-05-11T22:42:01.826Z",
+        "text": "[mensagem vazia]",
+        "meta": {
+          "source": "whatsapp",
+          "analysis": {
+            "sentimento": "neutro",
+            "tipo": "nao_resposta",
+            "objecao": null,
+            "proximidadeICP": "baixo"
+          },
+          "audio": false
+        }
+      },
+      {
+        "direction": "outbound",
+        "timestamp": "2026-05-11T22:42:03.565Z",
+        "text": "Olá! Parece que sua mensagem veio em branco novamente. Se precisar de ajuda ou tiver alguma dúvida específica, estou aqui para ajudar. Não hesite em me contar um pouco mais sobre o que você está procurando, assim podemos encontrar a melhor solução para você!",
+        "meta": {
+          "source": "openai",
+          "stage": "MIDDLE_OF_FUNNEL"
+        }
+      }
+    ],
+    "last_contact_at": "2026-05-11T22:42:03.565Z",
+    "last_inbound_at": "2026-05-11T22:42:01.826Z",
+    "last_outbound_at": "2026-05-11T22:42:03.565Z",
+    "followup_markers_sent": [],
+    "human_transition_notified_at": null,
+    "updated_at": "2026-05-11T22:42:03.565Z"
+  }
+}
