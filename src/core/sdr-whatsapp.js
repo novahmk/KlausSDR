@@ -16,6 +16,7 @@ const securityValidator = require('./security-validator');
 const botDetector = require('../utils/bot-detector');
 const escapeStrategy = require('../utils/escape-strategy');
 const { securitySheets } = require('../sheets/security-sheets');
+const intentMatcher = require('./intent-matcher');
 
 // ============================================
 // CONTROLE DE SESSÃO — apenas leads/mensagens da sessão atual
@@ -287,7 +288,36 @@ class SDRWhatsAppSystem {
             return; // Não responder ao BOT como se fosse humano
         }
 
-        // 3. Analisar Mensagem
+        // 3. Verificar intent simples — evita chamadas desnecessárias ao GPT-4o
+        const intentResult = intentMatcher.match(textoEntrada);
+        if (intentResult.matched) {
+            logger.info(`[SDR IA] Intent '${intentResult.intent}' detectado para ${telefoneNumero} — resposta template (sem GPT)`);
+
+            const authIntent = await securityValidator.authorizeMessage(telefoneNumero, {
+                nomeLead: leadNome,
+                tipoMensagem: 'WhatsApp (Template)'
+            });
+
+            if (authIntent.autorizado) {
+                await this._simulateTypingDelay(telefoneId, intentResult.response);
+                await this.whatsapp.sendMessage(telefoneId, intentResult.response);
+
+                await crmSheets.appendRow(CRM_TABS.INTERACOES, {
+                    id: `msg_tpl_${Date.now()}`,
+                    lead_id: telefoneNumero,
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    hora: new Date().toLocaleTimeString('pt-BR'),
+                    tipo_contato: 'WhatsApp (SDR Template)',
+                    mensagem_enviada: intentResult.response,
+                    notas: `intent=${intentResult.intent}`
+                });
+            } else {
+                logger.warn(`[SDR IA] Template bloqueado para ${telefoneNumero}: ${authIntent.motivo}`);
+            }
+            return;
+        }
+
+        // 4. Analisar Mensagem via GPT-4o
         const analise = await this._analisarMensagem(textoEntrada, leadNome);
 
         await this._notifyCallIfNeeded({

@@ -6,6 +6,7 @@ const env = require('../config/env');
 const leadStateStore = require('./sdr-state-store');
 const remoteControl = require('./sdr-remote-control');
 const { loadSdrSystemPrompt } = require('../openai/sdr-prompt-loader');
+const intentMatcher = require('./intent-matcher');
 
 const DUE_FOLLOWUPS = [1, 5, 10];
 
@@ -26,6 +27,25 @@ class SDRStateMachine {
         whatsappClient = null
     }) {
         const leadKey = this._normalizeLeadId(leadId);
+
+        // Early-return: intent simples resolvido sem chamar GPT-4o
+        if (!audioContext) {
+            const intentResult = intentMatcher.match(currentText);
+            if (intentResult.matched) {
+                logger.info(`[SDR State] Intent '${intentResult.intent}' para lead ${leadKey} — resposta template (sem GPT)`);
+                leadStateStore.recordOutbound(leadKey, intentResult.response, {
+                    source: 'intent-template',
+                    intent: intentResult.intent
+                });
+                return {
+                    reply: intentResult.response,
+                    state: leadStateStore.getLead(leadKey),
+                    stage: leadStateStore.getLead(leadKey).current_funnel_stage || 'TOP_OF_FUNNEL',
+                    fromIntent: intentResult.intent
+                };
+            }
+        }
+
         const currentState = leadStateStore.setLeadInfo(leadKey, {
             decisor_name: leadMeta.decisor_name || leadMeta.nome || '',
             decisor_contact: leadMeta.decisor_contact || leadKey,
