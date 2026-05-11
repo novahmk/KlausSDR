@@ -44,39 +44,37 @@ class SDREngine {
     }
 
     /**
-     * Avalia o lead e gera qual deve ser a próxima mensagem a ser enviada
+     * Avalia o lead e gera qual deve ser a próxima mensagem a ser enviada.
+     * Realiza a análise de intenção e a geração da resposta em uma ÚNICA chamada ao GPT-4o.
+     * O histórico da conversa é passado como array multi-turn [{role, content}].
      * @param {Object} lead - Dados atuais do lead
-     * @returns {Object} { novaTemperatura, novoFluxo, proximaMensagem }
+     * @returns {Object} { novaTemperatura, novoFluxo, proximaMensagem, analise, origem }
      */
     async generateNextAction(lead) {
         logger.info(`[SDR] Gerando próxima ação para o número ${lead.numero}...`);
 
         const fase = this._normalizarFase(lead.fluxo);
-        const objecao = normalizeObjecao(this._detectarObjecao(lead.ultimaResposta));
-        const contexto = [
-            lead.nome,
-            lead.temperatura,
-            lead.fluxo,
-            lead.ultimaResposta
-        ].filter(Boolean).join(' | ');
-
-        const analise = { objecao };
         const antiRep = this._buildAntiRep(lead);
+        const multiTurnHistorico = this._buildMultiTurnHistorico(lead);
+
         const sdrContext = buildSdrContext({
             fase,
             fluxo: lead.fluxo,
             score: this._estimateLeadScore(lead),
             temperatura: lead.temperatura,
-            historico: this._buildHistorico(lead),
-            objecoes: this._extractObjecoes(lead, objecao)
-        }, analise, antiRep);
+            historico: multiTurnHistorico.map((m, i) => ({ id: i + 1, text: m.content })),
+            objecoes: this._extractObjecoes(lead, '')
+        }, {}, antiRep);
 
-        const playbook = sdrLearning.buscarPlaybook(contexto, fase, objecao);
+        const contexto = [lead.nome, lead.temperatura, lead.fluxo, lead.ultimaResposta]
+            .filter(Boolean).join(' | ');
+
+        const playbook = sdrLearning.buscarPlaybook(contexto, fase, '');
         if (playbook) {
             this._auditIntelligence({
                 lead,
                 fase,
-                objecao,
+                objecao: '',
                 origem: 'playbook',
                 scorePlaybook: Number(playbook.score.toFixed(3))
             });
@@ -85,49 +83,66 @@ class SDREngine {
                 novaTemperatura: lead.temperatura || 'A definir',
                 novoFluxo: lead.fluxo || 'Cenário 1',
                 proximaMensagem: playbook.mensagem,
+                analise: {},
                 origem: 'playbook',
                 scorePlaybook: Number(playbook.score.toFixed(3)),
                 playbookId: playbook.playbookId
             };
         }
 
-        const completion = await this.openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: 'system',
-                    content: `${SDR_SCRIPT}\n\nCONTEXTO ESPECIALIZADO SDR:\n${sdrContext}\n\nDIRETRIZ DE ESTILO:\n- Seja criativo na formulacao da mensagem sem perder clareza e objetividade.\n- Evite respostas roboticas ou repetitivas; varie abertura e CTA dentro da fase.\n- Mantenha o foco em conversao com tom humano e profissional.\n\nRetorne um JSON valido com: novaTemperatura (Quente, Frio, A definir), novoFluxo (Cenario atual do fluxo), proximaMensagem (texto da mensagem exata que a automacao devera enviar).`
-                },
-                {
-                    role: 'user',
-                    content: `
-DADOS DO LEAD:
-Número: ${lead.numero}
-Nome: ${lead.nome || 'Desconhecido'}
-Fluxo Atual: ${lead.fluxo || 'Novo'}
-Temperatura: ${lead.temperatura || 'N/A'}
-Última Resposta do Lead: ${lead.ultimaResposta || 'Nenhuma (Primeiro contato)'}
-Objeção Detectada: ${objecao || 'nenhuma'}
+        const systemPrompt = [
+            SDR_SCRIPT,
+            `\nCONTEXTO ESPECIALIZADO SDR:\n${sdrContext}`,
+            '\nDIRETRIZ DE ESTILO:',
+            '- Seja criativo na formulacao da mensagem sem perder clareza e objetividade.',
+            '- Evite respostas roboticas ou repetitivas; varie abertura e CTA dentro da fase.',
+            '- Mantenha o foco em conversao com tom humano e profissional.',
+            '\nRetorne um JSON valido com EXATAMENTE dois campos:',
+            '1. "analise": { "fase": string, "objecao": string|null, "intencao": string, "scoreEstimado": number (0-100) }',
+            '2. "resposta": { "novaTemperatura": string (Quente|Frio|A definir), "novoFluxo": string, "proximaMensagem": string }'
+        ].join('\n');
 
-Por favor, gere a próxima mensagem baseada na evolução natural dos dias (Se Novo -> Vá para Cenário 1. Se em Follow-up D1 e sem resposta -> Vá para D5, etc.)`
-                }
+        const userMessage = [
+            'DADOS DO LEAD:',
+            `Número: ${lead.numero}`,
+            `Nome: ${lead.nome || 'Desconhecido'}`,
+            `Fluxo Atual: ${lead.fluxo || 'Novo'}`,
+            `Temperatura: ${lead.temperatura || 'N/A'}`,
+            '',
+            'Com base no histórico da conversa acima, analise a intenção do lead e gere a próxima mensagem.',
+            'Siga a evolução natural dos dias (Novo → Cenário 1 → Follow-up D1 → D5 → D10, etc.).',
+            'Preencha os campos "analise" e "resposta" conforme instruído.'
+        ].join('\n');
+
+        const completion = await this.openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                ...multiTurnHistorico,
+                { role: 'user', content: userMessage }
             ],
             temperature: this._getCreativityTemperature(fase),
             response_format: { type: 'json_object' }
         });
 
-        const action = JSON.parse(completion.choices[0].message.content);
+        const result = JSON.parse(completion.choices[0].message.content);
+        const analise = result.analise || {};
+        const resposta = result.resposta || result;
+
         this._auditIntelligence({
             lead,
-            fase,
-            objecao,
+            fase: analise.fase || fase,
+            objecao: analise.objecao || '',
             origem: 'openai',
-            novoFluxo: action.novoFluxo,
-            novaTemperatura: action.novaTemperatura
+            novoFluxo: resposta.novoFluxo,
+            novaTemperatura: resposta.novaTemperatura
         });
 
         return {
-            ...action,
+            novaTemperatura: resposta.novaTemperatura,
+            novoFluxo: resposta.novoFluxo,
+            proximaMensagem: resposta.proximaMensagem,
+            analise,
             origem: 'openai'
         };
     }
@@ -158,9 +173,32 @@ Por favor, gere a próxima mensagem baseada na evolução natural dos dias (Se N
         return 50;
     }
 
-    _buildHistorico(lead) {
-        const parts = [lead.fluxo, lead.proximaMensagemAtual, lead.ultimaResposta].filter(Boolean);
-        return parts.map((item, idx) => ({ id: idx + 1, text: String(item) }));
+    /**
+     * Constrói o histórico da conversa no formato multi-turn para a API do OpenAI.
+     * Alterna entre mensagens do assistente (bot) e do usuário (lead).
+     * @param {Object} lead
+     * @returns {Array<{role: string, content: string}>}
+     */
+    _buildMultiTurnHistorico(lead) {
+        const messages = [];
+
+        if (Array.isArray(lead.historico) && lead.historico.length > 0) {
+            for (const item of lead.historico) {
+                if (item.role && item.content) {
+                    messages.push({ role: item.role, content: String(item.content) });
+                }
+            }
+            if (messages.length > 0) return messages;
+        }
+
+        if (lead.proximaMensagemAtual) {
+            messages.push({ role: 'assistant', content: String(lead.proximaMensagemAtual) });
+        }
+        if (lead.ultimaResposta) {
+            messages.push({ role: 'user', content: String(lead.ultimaResposta) });
+        }
+
+        return messages;
     }
 
     _extractObjecoes(lead, objecaoAtual) {
