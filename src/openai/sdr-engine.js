@@ -102,7 +102,17 @@ class SDREngine {
             '2. "resposta": { "novaTemperatura": string (Quente|Frio|A definir), "novoFluxo": string, "proximaMensagem": string }'
         ].join('\n');
 
+        const previousMessages = multiTurnHistorico
+            .filter(m => m.role === 'assistant')
+            .map(m => String(m.content || '').slice(0, 120));
+
+        const variabilityInstruction = previousMessages.length > 0
+            ? `ATENÇÃO: Responda de forma natural e diferente das mensagens anteriores. Evite repetir frases, aberturas ou call-to-actions já usados. Mensagens anteriores do SDR: ${JSON.stringify(previousMessages)}`
+            : 'ATENÇÃO: Responda de forma natural e humana. Evite frases genéricas ou repetitivas.';
+
         const userMessage = [
+            variabilityInstruction,
+            '',
             'DADOS DO LEAD:',
             `Número: ${lead.numero}`,
             `Nome: ${lead.nome || 'Desconhecido'}`,
@@ -122,6 +132,7 @@ class SDREngine {
                 { role: 'user', content: userMessage }
             ],
             temperature: this._getCreativityTemperature(fase),
+            top_p: 0.9,
             response_format: { type: 'json_object' }
         });
 
@@ -233,10 +244,10 @@ class SDREngine {
 
     _getCreativityTemperature(fase) {
         const normalized = String(fase || '').toLowerCase();
-        if (normalized.includes('fase_1')) return 0.72;
-        if (normalized.includes('fase_2')) return 0.63;
-        if (normalized.includes('fase_3')) return 0.56;
-        return 0.6;
+        if (normalized.includes('fase_1')) return 0.80;  // abordagem inicial — mais criativo
+        if (normalized.includes('fase_2')) return 0.75;  // qualificação — variado mas coerente
+        if (normalized.includes('fase_3')) return 0.70;  // conversão — preciso, ainda variável
+        return 0.75;
     }
 
     _auditIntelligence({ lead, fase, objecao, origem, scorePlaybook, novoFluxo, novaTemperatura }) {

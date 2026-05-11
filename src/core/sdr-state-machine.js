@@ -65,6 +65,15 @@ class SDRStateMachine {
             audio_context: audioContext || ''
         };
 
+        const previousReplies = (leadStateStore.getLead(leadKey).history || [])
+            .filter(h => h.role === 'assistant')
+            .map(h => String(h.content || '').slice(0, 120))
+            .slice(-5);
+
+        const variabilityNote = previousReplies.length > 0
+            ? `ATENÇÃO: Responda de forma natural e diferente das mensagens anteriores. Evite repetir frases, aberturas ou call-to-actions já usados. Mensagens anteriores enviadas: ${JSON.stringify(previousReplies)}`
+            : 'ATENÇÃO: Responda de forma natural e humana. Evite frases genéricas ou repetitivas.';
+
         try {
             const completion = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
@@ -72,10 +81,11 @@ class SDRStateMachine {
                     { role: 'system', content: this.systemPrompt },
                     {
                         role: 'user',
-                        content: JSON.stringify(promptPayload, null, 2)
+                        content: `${variabilityNote}\n\n${JSON.stringify(promptPayload, null, 2)}`
                     }
                 ],
-                temperature: this._getCreativityTemperature(updatedState.current_funnel_stage)
+                temperature: this._getCreativityTemperature(updatedState.current_funnel_stage),
+                top_p: 0.9
             });
 
             const reply = String(completion.choices?.[0]?.message?.content || '').trim();
@@ -155,13 +165,23 @@ class SDRStateMachine {
             follow_up_reason: `D${followUpDay}`
         };
 
+        const previousFollowUps = (currentState.history || [])
+            .filter(h => h.role === 'assistant')
+            .map(h => String(h.content || '').slice(0, 120))
+            .slice(-5);
+
+        const followUpVariabilityNote = previousFollowUps.length > 0
+            ? `ATENÇÃO: Este é um follow-up D${followUpDay}. Responda de forma natural e diferente das mensagens anteriores. Evite repetir aberturas ou argumentos já usados. Mensagens anteriores: ${JSON.stringify(previousFollowUps)}`
+            : `ATENÇÃO: Este é um follow-up D${followUpDay}. Seja natural, humano e direto. Evite frases genéricas.`;
+
         const completion = await this.openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [
                 { role: 'system', content: this.systemPrompt },
-                { role: 'user', content: JSON.stringify(promptPayload, null, 2) }
+                { role: 'user', content: `${followUpVariabilityNote}\n\n${JSON.stringify(promptPayload, null, 2)}` }
             ],
-            temperature: this._getCreativityTemperature(currentState.current_funnel_stage)
+            temperature: this._getCreativityTemperature(currentState.current_funnel_stage),
+            top_p: 0.9
         });
 
         const reply = String(completion.choices?.[0]?.message?.content || '').trim();
@@ -408,10 +428,10 @@ class SDRStateMachine {
 
     _getCreativityTemperature(stage) {
         const normalized = String(stage || '').toUpperCase();
-        if (normalized === 'TOP_OF_FUNNEL') return 0.75;
-        if (normalized === 'MIDDLE_OF_FUNNEL') return 0.66;
-        if (normalized === 'BOTTOM_OF_FUNNEL') return 0.56;
-        return 0.64;
+        if (normalized === 'TOP_OF_FUNNEL') return 0.80;    // mais criativo na abordagem
+        if (normalized === 'MIDDLE_OF_FUNNEL') return 0.75; // variado mas coerente
+        if (normalized === 'BOTTOM_OF_FUNNEL') return 0.70; // preciso, ainda variável
+        return 0.75;
     }
 
     _normalizeLeadId(leadId) {
