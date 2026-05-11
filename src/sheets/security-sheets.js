@@ -44,6 +44,10 @@ class SecuritySheets {
         this._configCache = null;
         this._configCacheTime = 0;
         this._CONFIG_TTL = 5 * 60 * 1000; // 5 minutes cache
+
+        // Cache de registros de segurança por lead (TTL de 10 minutos)
+        this._securityRecordCache = new Map(); // leadId -> { record, expiresAt }
+        this._SECURITY_RECORD_TTL = 10 * 60 * 1000; // 10 minutes
     }
 
     // ─────────────────────────────────────────────────────────
@@ -52,10 +56,18 @@ class SecuritySheets {
 
     /**
      * Fetch the security record for a given lead ID.
+     * Results are cached locally for 10 minutes to avoid repeated Sheets API calls.
      * @param {string} leadId
      * @returns {Object|null}
      */
     async getSecurityRecord(leadId) {
+        const key = String(leadId).trim();
+        const cached = this._securityRecordCache.get(key);
+        if (cached && Date.now() < cached.expiresAt) {
+            logger.debug(`[SecuritySheets] Cache hit para lead ${key}`);
+            return cached.record;
+        }
+
         try {
             const rows = await this.client.getRange(`${SECURITY_TABS.SEGURANCA}!A:J`);
             if (!rows || rows.length < 2) return null;
@@ -67,20 +79,35 @@ class SecuritySheets {
             const razaoBloqueioIdx = headers.findIndex(h => h.includes('razão bloqueio') || h.includes('razao bloqueio'));
             const motivoIdx = headers.findIndex(h => h === 'motivo');
 
-            const row = rows.slice(1).find(r => String(r[leadIdIdx] || '').trim() === String(leadId).trim());
-            if (!row) return null;
+            const row = rows.slice(1).find(r => String(r[leadIdIdx] || '').trim() === key);
 
-            return {
+            const record = row ? {
                 leadId: row[leadIdIdx],
                 bloqueado: String(row[bloqueadoIdx] || '').trim(),
                 statusFinal: String(row[statusFinalIdx] || '').trim(),
                 razaoBloqueio: String(row[razaoBloqueioIdx] || '').trim(),
                 motivo: String(row[motivoIdx] || '').trim()
-            };
+            } : null;
+
+            this._securityRecordCache.set(key, {
+                record,
+                expiresAt: Date.now() + this._SECURITY_RECORD_TTL
+            });
+
+            return record;
         } catch (err) {
-            logger.warn(`[SecuritySheets] Erro ao ler SEGURANÇA para lead ${leadId}: ${err.message}`);
+            logger.warn(`[SecuritySheets] Erro ao ler SEGURANÇA para lead ${key}: ${err.message}`);
             return null;
         }
+    }
+
+    /**
+     * Invalida o cache de segurança para um lead específico.
+     * Deve ser chamado após upsertSecurityRecord para garantir consistência.
+     * @param {string} leadId
+     */
+    invalidateSecurityCache(leadId) {
+        this._securityRecordCache.delete(String(leadId).trim());
     }
 
     /**
@@ -102,6 +129,7 @@ class SecuritySheets {
                 nota: data.nota || ''
             };
             await this.client.append(`${SECURITY_TABS.SEGURANCA}!A:J`, row);
+            this.invalidateSecurityCache(data.leadId);
             logger.info(`[SecuritySheets] Registro de segurança gravado para lead ${data.leadId}`);
         } catch (err) {
             logger.error(`[SecuritySheets] Erro ao gravar SEGURANÇA: ${err.message}`);
