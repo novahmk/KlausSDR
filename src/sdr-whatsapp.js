@@ -447,12 +447,14 @@ class SDRWhatsAppSystem {
         const headers = leads[0].map(h => String(h).toLowerCase());
         const idIdx = headers.findIndex(h => h === 'lead_id' || h === 'lead id' || h === 'id' || h === 'telefone');
         const nomeIdx = headers.findIndex(h => h.includes('nome'));
+        const empresaIdx = headers.findIndex(h => h.includes('empresa') || h.includes('company') || h.includes('clinica') || h.includes('clínica'));
         const criadoIdx = headers.findIndex(h => h.includes('data_criacao') || h.includes('created_at') || h.includes('datacriacao'));
 
         for (let r = 1; r < leads.length; r++) {
             const row = leads[r];
             const telefone = this._normalizarTelefone(row[idIdx]);
             const nome = row[nomeIdx] || 'Comercial';
+            const empresa = empresaIdx >= 0 ? String(row[empresaIdx] || '').trim() : '';
 
             if (!telefone) continue;
 
@@ -482,7 +484,7 @@ class SDRWhatsAppSystem {
                     continue;
                 }
 
-                const primeiraMsg = await this._gerarPrimeiraAbordagem(nome);
+                const primeiraMsg = await this._gerarPrimeiraAbordagem(nome, empresa);
 
                 // Envia
                 try {
@@ -568,9 +570,17 @@ class SDRWhatsAppSystem {
         return { sentimento, tipo, objecao, proximidadeICP };
     }
 
-    async _gerarPrimeiraAbordagem(nome) {
+    async _gerarPrimeiraAbordagem(nome, empresa = '') {
+        const companyName = String(empresa || process.env.SDR_COMPANY_NAME || '').trim();
+        const companyChunk = companyName
+            ? `Você representa a empresa "${companyName}".`
+            : 'Você representa nossa equipe comercial.';
+
         const prompt = `Gere uma primeira mensagem de abordagem via WhatsApp para o lead "${nome}".
-Direta, breve (3 linhas máx), valor claro. APENAS a mensagem:`;
+${companyChunk}
+Direta, breve (3 linhas maximo), natural em portugues do Brasil e sem placeholders.
+Nao use colchetes, chaves, tags ou texto tipo "[Nome da Empresa]".
+APENAS a mensagem final:`;
 
         try {
             const comp = await this.openai.chat.completions.create({
@@ -581,10 +591,31 @@ Direta, breve (3 linhas máx), valor claro. APENAS a mensagem:`;
                 ],
                 temperature: 0.72
             });
-            return comp.choices[0].message.content.trim();
+            return this._sanitizeOutboundText(comp.choices[0].message.content, { nome, empresa: companyName });
         } catch {
             return `Olá ${nome}! Sou o SDR IA. Gostaria de uma conversa breve. Posso ligar?`;
         }
+    }
+
+    _sanitizeOutboundText(text, { nome = '', empresa = '' } = {}) {
+        let result = String(text || '').trim();
+
+        const genericCompany = String(process.env.SDR_COMPANY_NAME || '').trim() || 'nossa equipe';
+        const resolvedCompany = String(empresa || '').trim() || genericCompany;
+        const resolvedName = String(nome || '').trim() || 'você';
+
+        // Normaliza placeholders comuns que podem vazar da IA
+        result = result
+            .replace(/\[(nome da empresa|empresa|company name)\]/gi, resolvedCompany)
+            .replace(/\{(nome da empresa|empresa|company name)\}/gi, resolvedCompany)
+            .replace(/\[(nome|lead name)\]/gi, resolvedName)
+            .replace(/\{(nome|lead name)\}/gi, resolvedName)
+            .replace(/\[[^\]]+\]/g, '')
+            .replace(/\{[^}]+\}/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+        return result;
     }
 
     async _simulateTypingDelay(telefoneId, mensagem) {

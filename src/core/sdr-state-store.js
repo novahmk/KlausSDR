@@ -128,6 +128,10 @@ class SDRLeadStateStore {
         let changed = false;
         const results = Object.entries(this._state)
             .map(([leadId, leadState]) => {
+                if (leadState.human_transition_notified_at) {
+                    return null;
+                }
+
                 const lastContactAt = leadState.last_contact_at
                     ? new Date(leadState.last_contact_at).getTime()
                     : null;

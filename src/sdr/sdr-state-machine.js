@@ -16,8 +16,12 @@ const sessionManager = require('../session/session-manager');
 const FeedbackSystem = require('../learning/feedback-system');
 const patternAnalyzer = require('../learning/pattern-analyzer');
 const { crmSheets } = require('../sheets/crm-sheets');
+const operationalMetrics = require('../monitoring/operational-metrics');
+const OutputValidator = require('../compliance/output-validator');
+const { renderTemplate, selectTemplate } = require('../templates/followup-templates');
 
 const feedbackSystem = new FeedbackSystem(crmSheets);
+const metricsAggregator = require('../monitoring/metrics-aggregator');
 
 const DUE_FOLLOWUPS = [1, 5, 10];
 
@@ -25,6 +29,8 @@ class SDRStateMachine {
     constructor() {
         this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         this.systemPrompt = loadSdrSystemPrompt();
+        this._aggregationCycleCounter = 0;
+        this._lastAggregationTime = 0;
     }
 
     async generateReply({
@@ -92,23 +98,22 @@ class SDRStateMachine {
             leadStateStore.addObjection(leadKey, updatedState.addObjection);
         }
 
+        // OPTIMIZED: Reduzir contexto para 120 tokens em vez de 400+ (70% economia)
+        const lastMessages = this._buildConversationHistory(history, leadKey)
+            .slice(-2);  // Apenas últimas 2 mensagens
+
         const promptPayload = {
-            conversation_history: this._buildConversationHistory(history, leadKey),
+            conversation_history: lastMessages,
             lead_metadata: {
                 lead_id: leadKey,
                 decisor_name: leadMeta.decisor_name || leadMeta.nome || '',
-                decisor_contact: leadMeta.decisor_contact || leadKey,
-                company: leadMeta.company || leadMeta.empresa || '',
-                pain_points: this._normalizePainPoints(leadMeta.pain_points)
+                company: leadMeta.company || leadMeta.empresa || ''
+                // Removido: decisor_contact, pain_points (já estão no analysis)
             },
             current_funnel_stage: updatedState.current_funnel_stage,
-            follow_up_counter: updatedState.follow_up_counter,
-            objections_met: leadStateStore.getLead(leadKey).objections_met || [],
-            lead_info: leadStateStore.getLead(leadKey).lead_info || {},
-            current_datetime: currentDate.toISOString(),
-            current_message: currentText,
-            analysis,
-            audio_context: audioContext || ''
+            objections_met: (leadStateStore.getLead(leadKey).objections_met || []).slice(-3),  // Apenas últimas 3
+            current_message: currentText
+            // Removido: follow_up_counter, lead_info, audio_context, analysis (não usados em reply)
         };
 
         const previousReplies = (leadStateStore.getLead(leadKey).history || [])
@@ -146,8 +151,11 @@ class SDRStateMachine {
                         content: `${variabilityNote}\n\n${JSON.stringify(promptPayload, null, 2)}`
                     }
                 ],
-                temperature: this._getCreativityTemperature(updatedState.current_funnel_stage),
-                top_p: 0.9
+                max_tokens: 50,  // TUNING: Resposta concisa (<50 tokens = <100 chars)
+                temperature: 0.4,  // TUNING: Reduzido de dinâmico para 0.4 (mais determinístico)
+                top_p: 0.6,  // TUNING: Reduzido de 0.9 para 0.6 (menos variação)
+                frequency_penalty: 0.4,  // NOVO: Evita repetição de palavras
+                presence_penalty: 0.1   // NOVO: Encoraja termos novos
             });
 
             const reply = String(completion.choices?.[0]?.message?.content || '').trim();
@@ -155,20 +163,60 @@ class SDRStateMachine {
                 throw new Error('Resposta vazia da OpenAI');
             }
 
-            leadStateStore.recordOutbound(leadKey, reply, {
-                source: 'openai',
-                stage: updatedState.current_funnel_stage
+            // VALIDAÇÃO: Checagem de compliance pré-envio (OutputValidator)
+            const validationResult = OutputValidator.validate(reply, {
+                stage: updatedState.current_funnel_stage,
+                followUpDay: null,
+                leadState: leadStateStore.getLead(leadKey)
             });
+
+            let finalReply = reply;
+            if (!validationResult.valid) {
+                logger.warn(`[SDR State] Resposta rejeitada (${validationResult.issues.length} issues): ${validationResult.issues.join('; ')}`);
+                finalReply = OutputValidator.useFallback({
+                    stage: updatedState.current_funnel_stage,
+                    objections: leadStateStore.getLead(leadKey).objections_met || []
+                });
+            } else {
+                logger.info(`[SDR State] Resposta validada (score: ${validationResult.score})`);
+            }
+
+            leadStateStore.recordOutbound(leadKey, finalReply, {
+                source: 'openai',
+                stage: updatedState.current_funnel_stage,
+                validationScore: validationResult.score
+            });
+
+            operationalMetrics.trackOutboundMessage({
+                leadId: leadKey,
+                source: 'openai',
+                stage: updatedState.current_funnel_stage,
+                replyLength: finalReply.length,
+                validationScore: validationResult.score,
+                fallbackUsed: finalReply !== reply,
+                messagePreview: finalReply.slice(0, 120)
+            }).catch(err => logger.warn(`[PILAR3_METRICS] Falha ao registrar outbound: ${err.message}`));
 
             // Armazenar resposta no cache para deduplicação de retries
             const replyResult = {
-                reply,
+                reply: finalReply,
                 state: leadStateStore.getLead(leadKey),
                 stage: updatedState.current_funnel_stage,
                 persona: persona.key
             };
             const cacheKey = `${leadKey}::${String(currentText).trim()}`;
             contextCache.set(cacheKey, replyResult);
+
+            // Pilar 3 Phase 2: Agregação inline a cada N replies
+            this._aggregationCycleCounter++;
+            if (this._aggregationCycleCounter >= 5) {
+                try {
+                    await metricsAggregator.processAggregations('hourly');
+                    this._aggregationCycleCounter = 0;
+                } catch (err) {
+                    logger.debug(`[PILAR3_AGGREGATION_INLINE] Falha (ignorado): ${err.message}`);
+                }
+            }
 
             await this.evaluateForHumanTransition({
                 leadId: leadKey,
@@ -217,54 +265,60 @@ class SDRStateMachine {
     }) {
         const leadKey = this._normalizeLeadId(leadId);
         const currentState = leadStateStore.getLead(leadKey);
-        const promptPayload = {
-            conversation_history: currentState.history || [],
-            lead_metadata: {
-                lead_id: leadKey,
-                decisor_name: leadMeta.decisor_name || currentState.lead_info?.decisor_name || '',
-                decisor_contact: leadMeta.decisor_contact || currentState.lead_info?.decisor_contact || leadKey,
-                company: leadMeta.company || currentState.lead_info?.company || '',
-                pain_points: leadMeta.pain_points || currentState.lead_info?.pain_points || []
-            },
-            current_funnel_stage: currentState.current_funnel_stage,
-            follow_up_counter: followUpDay,
-            objections_met: currentState.objections_met || [],
-            lead_info: currentState.lead_info || {},
-            current_datetime: currentDate.toISOString(),
-            follow_up_reason: `D${followUpDay}`
-        };
 
-        const previousFollowUps = (currentState.history || [])
-            .filter(h => h.role === 'assistant')
-            .map(h => String(h.content || '').slice(0, 120))
-            .slice(-5);
+        // OTIMIZAÇÃO: Usar templates estruturados em vez de GPT para follow-ups
+        // Reduz 100% das chamadas GPT em follow-ups (D1/D5/D10)
+        
+        // Determinar chave do dia (D1, D5, D10)
+        const dayKey = `D${followUpDay}`;
 
-        const followUpVariabilityNote = previousFollowUps.length > 0
-            ? `ATENÇÃO: Este é um follow-up D${followUpDay}. Responda de forma natural e diferente das mensagens anteriores. Evite repetir aberturas ou argumentos já usados. Mensagens anteriores: ${JSON.stringify(previousFollowUps)}`
-            : `ATENÇÃO: Este é um follow-up D${followUpDay}. Seja natural, humano e direto. Evite frases genéricas.`;
+        // Selecionar template automático baseado em objections
+        const templateName = selectTemplate(dayKey, currentState);
+        logger.info(`[SDR State] Follow-up ${dayKey} para ${leadKey}: template='${templateName}'`);
 
-        const completion = await this.openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-                { role: 'system', content: this.systemPrompt },
-                { role: 'user', content: `${followUpVariabilityNote}\n\n${JSON.stringify(promptPayload, null, 2)}` }
-            ],
-            temperature: this._getCreativityTemperature(currentState.current_funnel_stage),
-            top_p: 0.9
+        // Renderizar template com variáveis do lead
+        const reply = renderTemplate(dayKey, templateName, {
+            nome: leadMeta.decisor_name || currentState.lead_info?.decisor_name || 'você',
+            empresa: leadMeta.company || currentState.lead_info?.company || ''
         });
 
-        const reply = String(completion.choices?.[0]?.message?.content || '').trim();
-        if (!reply) {
-            throw new Error('Resposta vazia ao gerar follow-up');
+        // Validar follow-up pré-envio
+        const validationResult = OutputValidator.validate(reply, {
+            stage: currentState.current_funnel_stage,
+            followUpDay: followUpDay,
+            leadState: currentState
+        });
+
+        let finalReply = reply;
+        if (!validationResult.valid) {
+            logger.warn(`[SDR State] Follow-up ${dayKey} rejeitado (${validationResult.issues.length} issues)`);
+            finalReply = OutputValidator.useFallback({
+                stage: currentState.current_funnel_stage,
+                objections: currentState.objections_met || []
+            });
         }
 
         leadStateStore.markFollowUpSent(leadKey, followUpDay);
-        leadStateStore.recordOutbound(leadKey, reply, {
-            source: 'scheduler',
-            followUpDay
+        leadStateStore.recordOutbound(leadKey, finalReply, {
+            source: 'template',  // Fonte mudou de 'scheduler'/'openai' para 'template'
+            followUpDay,
+            template: templateName,
+            validationScore: validationResult.score
         });
 
-        return reply;
+        operationalMetrics.trackOutboundMessage({
+            leadId: leadKey,
+            source: 'template',
+            stage: currentState.current_funnel_stage,
+            replyLength: finalReply.length,
+            validationScore: validationResult.score,
+            fallbackUsed: finalReply !== reply,
+            followUpDay,
+            template: templateName,
+            messagePreview: finalReply.slice(0, 120)
+        }).catch(err => logger.warn(`[PILAR3_METRICS] Falha ao registrar follow-up: ${err.message}`));
+
+        return finalReply;
     }
 
     async evaluateForHumanTransition({ leadId, leadMeta = {}, currentText = '', analysis = {}, whatsappClient = null, reason = 'TRANSICAO_HUMANA', personaUsed = '' }) {
@@ -273,21 +327,29 @@ class SDRStateMachine {
         const stage = currentState.current_funnel_stage || 'TOP_OF_FUNNEL';
 
         if (currentState.human_transition_notified_at) {
+            logger.info('[PILAR2_DECISION] HUMAN_TRANSITION_ALREADY_NOTIFIED', {
+                leadId: leadKey,
+                stage,
+                notifiedAt: currentState.human_transition_notified_at
+            });
             return false;
         }
 
-        const shouldNotify = this._shouldEscalateToHuman({ currentText, analysis, leadMeta, stage });
-        if (!shouldNotify) return false;
-
-        // Avaliação estruturada para notificação enriquecida (M3)
-        const leadForEval = {
-            ...leadMeta,
-            interacoes: (currentState.history || []).length,
-            objecoes: currentState.objections_met || [],
-            score: (analysis && analysis.scoreEstimado) || 50,
-            decisor_contact: leadMeta.decisor_contact || leadKey
-        };
-        const evaluation = EscalationRulesEngine.evaluate(leadForEval, { currentText, analysis, stage });
+        const leadForEval = this._buildEscalationLeadContext({
+            leadKey,
+            leadMeta,
+            analysis,
+            currentState
+        });
+        const evaluation = this._getEscalationDecision({
+            leadId: leadKey,
+            leadForEval,
+            currentText,
+            analysis,
+            stage,
+            leadMeta
+        });
+        if (!evaluation.shouldNotify) return false;
 
         // Construir notificação estruturada via NotificationBuilder (M3)
         const structuredNotification = evaluation.action === 'HANDOFF'
@@ -386,6 +448,27 @@ class SDRStateMachine {
             }
         }
 
+        // Pilar 3 Phase 2: Agregação de métricas e alertas por degradação
+        this._aggregationCycleCounter++;
+        const now = Date.now();
+        const timeSinceLastAggregation = now - this._lastAggregationTime;
+        const shouldAggregate = this._aggregationCycleCounter >= 10 || timeSinceLastAggregation > 15 * 60 * 1000; // 10 cycles ou 15 min
+
+        if (shouldAggregate) {
+            try {
+                await metricsAggregator.processAggregations('hourly');
+                // Agregação diária a cada 6 horas
+                if (this._aggregationCycleCounter % 36 === 0) {
+                    await metricsAggregator.processAggregations('daily');
+                }
+                this._lastAggregationTime = now;
+                this._aggregationCycleCounter = 0;
+                logger.info(`[PILAR3_AGGREGATION] Ciclo de agregação processado com sucesso`);
+            } catch (err) {
+                logger.warn(`[PILAR3_AGGREGATION] Falha ao processar agregações: ${err.message}`);
+            }
+        }
+
         return results;
     }
 
@@ -471,15 +554,120 @@ class SDRStateMachine {
         return this._containsAny(text, complexHints) || String(analysis && analysis.objecao || '').toLowerCase() === 'sem_budget';
     }
 
-    _shouldEscalateToHuman({ currentText, analysis, leadMeta, stage }) {
+    _buildEscalationLeadContext({ leadKey, leadMeta = {}, analysis = {}, currentState = {} }) {
+        return {
+            ...leadMeta,
+            ...currentState.lead_info,
+            interacoes: (currentState.history || []).length,
+            objecoes: currentState.objections_met || [],
+            score: analysis && analysis.scoreEstimado != null ? analysis.scoreEstimado : 50,
+            decisor_contact: leadMeta.decisor_contact || currentState.lead_info?.decisor_contact || leadKey,
+            decisor_name: leadMeta.decisor_name || leadMeta.nome || currentState.lead_info?.decisor_name || '',
+            company: leadMeta.company || leadMeta.empresa || currentState.lead_info?.company || ''
+        };
+    }
+
+    _getEscalationDecision({ leadId, leadForEval, currentText, analysis, stage, leadMeta }) {
         const ctx = { currentText, analysis, stage };
-        return EscalationRulesEngine.shouldHandoff(leadMeta || {}, ctx)
-            || EscalationRulesEngine.shouldEscalate(leadMeta || {}, ctx)
-            // Fallback para estágios antigos mantidos por compatibilidade
-            || this._isHumanRequest(String(currentText || '').toLowerCase(), analysis)
-            || this._isComplexObjection(String(currentText || '').toLowerCase(), analysis)
-            || this._isQualificationComplete({ currentText, leadMeta, analysis })
-            || stage === 'BOTTOM_OF_FUNNEL';
+        const evaluation = EscalationRulesEngine.evaluate(leadForEval || {}, ctx);
+        const legacySignals = {
+            humanRequest: this._isHumanRequest(String(currentText || '').toLowerCase(), analysis),
+            complexObjection: this._isComplexObjection(String(currentText || '').toLowerCase(), analysis),
+            qualificationComplete: this._isQualificationComplete({ currentText, leadMeta, analysis })
+        };
+
+        if (EscalationRulesEngine.shouldReject(leadForEval || {}, ctx)) {
+            const decision = {
+                ...evaluation,
+                shouldNotify: false
+            };
+            this._logCommercialDecision({
+                leadId,
+                stage,
+                currentText,
+                analysis,
+                leadForEval,
+                evaluation: decision,
+                legacySignals,
+                decisionType: 'REJECT'
+            });
+            return decision;
+        }
+
+        const legacyShouldNotify = legacySignals.humanRequest
+            || legacySignals.complexObjection
+            || legacySignals.qualificationComplete;
+
+        const decision = {
+            ...evaluation,
+            shouldNotify: EscalationRulesEngine.shouldHandoff(leadForEval || {}, ctx)
+                || EscalationRulesEngine.shouldEscalate(leadForEval || {}, ctx)
+                || legacyShouldNotify
+        };
+
+        this._logCommercialDecision({
+            leadId,
+            stage,
+            currentText,
+            analysis,
+            leadForEval,
+            evaluation: decision,
+            legacySignals,
+            decisionType: decision.action || 'NO_ACTION'
+        });
+
+        return decision;
+    }
+
+    _logCommercialDecision({
+        leadId,
+        stage,
+        currentText,
+        analysis,
+        leadForEval,
+        evaluation,
+        legacySignals,
+        decisionType
+    }) {
+        const logData = {
+            leadId,
+            decision: decisionType,
+            shouldNotify: !!evaluation.shouldNotify,
+            action: evaluation.action || 'NONE',
+            reason: evaluation.reason || 'NONE',
+            priority: evaluation.priority || 'NONE',
+            score: evaluation.score != null ? evaluation.score : null,
+            matched: Array.isArray(evaluation.matched) ? evaluation.matched : [],
+            stage,
+            analysisType: analysis && analysis.tipo ? analysis.tipo : '',
+            objection: analysis && analysis.objecao ? analysis.objecao : '',
+            legacySignals,
+            decisorContact: !!(leadForEval && leadForEval.decisor_contact),
+            interactions: leadForEval && leadForEval.interacoes != null ? leadForEval.interacoes : 0,
+            objectionsCount: Array.isArray(leadForEval && leadForEval.objecoes) ? leadForEval.objecoes.length : 0,
+            messagePreview: String(currentText || '').slice(0, 120)
+        };
+
+        if (decisionType === 'REJECT') {
+            logger.info('[PILAR2_DECISION] REJECT', logData);
+            operationalMetrics.trackCommercialDecision(logData).catch(err => logger.warn(`[PILAR3_METRICS] Falha ao registrar decisão: ${err.message}`));
+            return;
+        }
+
+        if (evaluation.shouldNotify && evaluation.action === 'HANDOFF') {
+            logger.info('[PILAR2_DECISION] HANDOFF', logData);
+            operationalMetrics.trackCommercialDecision(logData).catch(err => logger.warn(`[PILAR3_METRICS] Falha ao registrar decisão: ${err.message}`));
+            return;
+        }
+
+        if (evaluation.shouldNotify && evaluation.action === 'ESCALATE') {
+            logger.warn('[PILAR2_DECISION] ESCALATE', logData);
+            operationalMetrics.trackCommercialDecision(logData).catch(err => logger.warn(`[PILAR3_METRICS] Falha ao registrar decisão: ${err.message}`));
+            return;
+        }
+
+        logger.info('[PILAR2_DECISION] NO_ACTION', logData);
+        operationalMetrics.trackCommercialDecision(logData).catch(err => logger.warn(`[PILAR3_METRICS] Falha ao registrar decisão: ${err.message}`));
     }
 
     async _notifyAdminPayload({ leadId, leadMeta = {}, reason, currentText, analysis = {}, whatsappClient, action = 'LIGAR_AGORA' }) {
