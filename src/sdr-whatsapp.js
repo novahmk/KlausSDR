@@ -17,6 +17,7 @@ const botDetector = require('./security/bot-detector');
 const escapeStrategy = require('./security/escape-strategy');
 const { securitySheets } = require('./sheets/security-sheets');
 const intentMatcher = require('./sdr/intent-matcher');
+const sessionManager = require('./session/session-manager');
 
 // ============================================
 // CONTROLE DE SESSÃO — apenas leads/mensagens da sessão atual
@@ -78,6 +79,7 @@ class SDRWhatsAppSystem {
         this.whatsapp.on('qr', (qr) => {
             logger.info('\n📱 [SDR IA] QR CODE GERADO. Escaneie no seu WhatsApp Web:');
             qrcode.generate(qr, { small: true });
+            sessionManager.onQRGenerated();
         });
 
         this.whatsapp.on('authenticated', () => {
@@ -88,7 +90,7 @@ class SDRWhatsAppSystem {
         this.whatsapp.on('ready', () => {
             logger.info('🟢 [SDR IA] Sistema SDR pronto para disparar/escutar mensagens!');
             this.isReady = true;
-            SYSTEM_ACTIVATION = Date.now();
+            SYSTEM_ACTIVATION = sessionManager.onReady();
             logger.info(`[SDR IA] SYSTEM_ACTIVATION atualizado: ${new Date(SYSTEM_ACTIVATION).toISOString()}`);
             // Injeta o cliente WhatsApp no escape-strategy para canal WHATSAPP_ALT
             escapeStrategy.setWhatsAppClient(this.whatsapp);
@@ -118,6 +120,8 @@ class SDRWhatsAppSystem {
                 const handled = await this._handleRemoteCommand(msg);
                 if (handled) return;
 
+                sessionManager.registerLead(msg.from);
+                sessionManager.incrementMessageCount();
                 await this.processarMensagemRecebida(msg.from, msg.body, msg._data?.notifyName, msg);
             } catch (err) {
                 logger.error(`Erro ao processar recebimento: ${err.message}`);
