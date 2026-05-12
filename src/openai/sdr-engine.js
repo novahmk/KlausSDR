@@ -9,6 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('../config/logger');
 const analysisLog = require('../sheets/analysis-log');
+const contextCache = require('../cache/context-cache');
+const contextCompressor = require('../cache/context-compressor');
 
 // ─── Inlined: sdr-learning ────────────────────────────────────────────────────
 const PLAYBOOK_FILE = path.join(__dirname, '..', '..', 'data', 'sdr_playbooks.json');
@@ -357,6 +359,14 @@ class SDREngine {
     async generateNextAction(lead) {
         logger.info(`[SDR] Gerando próxima ação para o número ${lead.numero}...`);
 
+        // Cache key baseado no estado atual do lead (fluxo + última resposta)
+        const cacheKey = `${lead.numero}::${lead.fluxo}::${lead.ultimaResposta || ''}`;
+        const cached = contextCache.get(cacheKey);
+        if (cached) {
+            logger.info(`[SDR] Cache hit para ${lead.numero} — reutilizando ação anterior`);
+            return cached;
+        }
+
         const fase = this._normalizarFase(lead.fluxo);
         const antiRep = this._buildAntiRep(lead);
         const multiTurnHistorico = this._buildMultiTurnHistorico(lead);
@@ -383,7 +393,7 @@ class SDREngine {
                 scorePlaybook: Number(playbook.score.toFixed(3))
             });
 
-            return {
+            const playbookResult = {
                 novaTemperatura: lead.temperatura || 'A definir',
                 novoFluxo: lead.fluxo || 'Cenário 1',
                 proximaMensagem: playbook.mensagem,
@@ -392,6 +402,8 @@ class SDREngine {
                 scorePlaybook: Number(playbook.score.toFixed(3)),
                 playbookId: playbook.playbookId
             };
+            contextCache.set(cacheKey, playbookResult);
+            return playbookResult;
         }
 
         const systemPrompt = [
@@ -453,13 +465,15 @@ class SDREngine {
             novaTemperatura: resposta.novaTemperatura
         });
 
-        return {
+        const openaiResult = {
             novaTemperatura: resposta.novaTemperatura,
             novoFluxo: resposta.novoFluxo,
             proximaMensagem: resposta.proximaMensagem,
             analise,
             origem: 'openai'
         };
+        contextCache.set(cacheKey, openaiResult);
+        return openaiResult;
     }
 
     _normalizarFase(fluxo) {
@@ -495,25 +509,25 @@ class SDREngine {
      * @returns {Array<{role: string, content: string}>}
      */
     _buildMultiTurnHistorico(lead) {
-        const messages = [];
+        const raw = [];
 
         if (Array.isArray(lead.historico) && lead.historico.length > 0) {
             for (const item of lead.historico) {
                 if (item.role && item.content) {
-                    messages.push({ role: item.role, content: String(item.content) });
+                    raw.push({ role: item.role, content: String(item.content) });
                 }
             }
-            if (messages.length > 0) return messages;
+            if (raw.length > 0) return contextCompressor.compressMessages(raw);
         }
 
         if (lead.proximaMensagemAtual) {
-            messages.push({ role: 'assistant', content: String(lead.proximaMensagemAtual) });
+            raw.push({ role: 'assistant', content: String(lead.proximaMensagemAtual) });
         }
         if (lead.ultimaResposta) {
-            messages.push({ role: 'user', content: String(lead.ultimaResposta) });
+            raw.push({ role: 'user', content: String(lead.ultimaResposta) });
         }
 
-        return messages;
+        return contextCompressor.compressMessages(raw);
     }
 
     _extractObjecoes(lead, objecaoAtual) {
