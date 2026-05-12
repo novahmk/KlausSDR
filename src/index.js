@@ -16,14 +16,7 @@ const { separator } = require('./utils/formatters');
 
 // Módulos SDR ativos
 const SDRWhatsApp = require('./sdr-whatsapp');
-const SDRStateMachine = require('./sdr/sdr-state-machine');
-const SDREngine = require('./openai/sdr-engine');
-const SecurityValidator = require('./security/security-validator');
-const IntentMatcher = require('./sdr/intent-matcher');
-const BotDetector = require('./security/bot-detector');
-const EscapeStrategy = require('./security/escape-strategy');
 const Scheduler = require('./sdr/sdr-scheduler');
-const RemoteControl = require('./sdr/sdr-remote-control');
 
 class IASystem {
     /**

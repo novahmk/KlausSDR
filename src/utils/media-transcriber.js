@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const { OpenAI, toFile } = require('openai');
 const logger = require('../config/logger');
 
@@ -13,38 +12,6 @@ function getOpenAI() {
         _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     }
     return _openai;
-}
-
-/**
- * Descriptografa midia do WhatsApp usando AES-256-CBC + HKDF-SHA256.
- * Util para integracoes via webhook/CDN criptografado.
- */
-function decryptWhatsAppMedia(encryptedData, mediaKeyB64, mediaType = 'Audio') {
-    const mediaKey = Buffer.from(mediaKeyB64, 'base64');
-    const info = Buffer.from(`WhatsApp ${mediaType} Keys`);
-
-    const prk = crypto.createHmac('sha256', Buffer.alloc(32)).update(mediaKey).digest();
-
-    let t = Buffer.alloc(0);
-    let okm = Buffer.alloc(0);
-    for (let i = 1; okm.length < 112; i += 1) {
-        const hmac = crypto.createHmac('sha256', prk);
-        hmac.update(t);
-        hmac.update(info);
-        hmac.update(Buffer.from([i]));
-        t = hmac.digest();
-        okm = Buffer.concat([okm, t]);
-    }
-
-    okm = okm.slice(0, 112);
-    const iv = okm.slice(0, 16);
-    const cipherKey = okm.slice(16, 48);
-
-    const ciphertext = encryptedData.slice(0, encryptedData.length - 10);
-    const decipher = crypto.createDecipheriv('aes-256-cbc', cipherKey, iv);
-    decipher.setAutoPadding(true);
-
-    return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 }
 
 function detectMediaType(message, media = null) {
@@ -129,7 +96,6 @@ function _guessAudioExtension(mimeType) {
 }
 
 module.exports = {
-    decryptWhatsAppMedia,
     detectMediaType,
     transcribeAudio,
     createAudioContext
