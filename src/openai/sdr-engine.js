@@ -14,6 +14,8 @@ const contextCompressor = require('../cache/context-compressor');
 const personaSelector = require('../personas/persona-selector');
 const { EscalationRulesEngine } = require('../escalation/escalation-rules');
 const notificationBuilder = require('../escalation/notification-builder');
+const FeedbackSystem = require('../learning/feedback-system');
+const patternAnalyzer = require('../learning/pattern-analyzer');
 
 // ─── Inlined: sdr-learning ────────────────────────────────────────────────────
 const PLAYBOOK_FILE = path.join(__dirname, '..', '..', 'data', 'sdr_playbooks.json');
@@ -253,6 +255,7 @@ class SDRLearning {
 
 SDRLearning._hooksRegistered = false;
 const sdrLearning = new SDRLearning();
+const feedbackSystem = new FeedbackSystem();
 
 // ─── Inlined: sdr-intelligence ───────────────────────────────────────────────
 const FASE_CONTEXTS = Object.freeze({
@@ -497,6 +500,26 @@ class SDREngine {
                     : notificationBuilder.buildEscalationNotification(lead, escalationEval)
             };
             logger.info(`[SDR] Escalação detectada: ${escalationEval.action} (${escalationEval.reason}, score=${escalationEval.score})`);
+        }
+
+        // Registro de aprendizado quando lead é qualificado (HANDOFF)
+        if (escalationEval.action === 'HANDOFF') {
+            feedbackSystem.recordSuccessfulConversation({
+                numero: lead.numero,
+                fase: analise.fase || fase,
+                personas_used: persona ? persona.nome : '',
+                playbooks_used: '',
+                message_count: (Array.isArray(lead.historico) ? lead.historico.length : 0) + 1,
+                score: analise.scoreEstimado || this._estimateLeadScore(lead),
+                time_to_outcome_ms: null
+            });
+
+            // A cada 10 conversas bem-sucedidas, rodar análise de padrões
+            const feedbackStats = feedbackSystem.getSuccessRate();
+            if (feedbackStats.total > 0 && feedbackStats.total % 10 === 0) {
+                const patterns = patternAnalyzer.analyzeSuccessPatterns(feedbackSystem.getSuccessPatterns());
+                logger.info(`[SDR] Análise de padrões (${feedbackStats.total} conversas): ${JSON.stringify(patterns.recommendations || [])}`);
+            }
         }
 
         contextCache.set(cacheKey, openaiResult);
