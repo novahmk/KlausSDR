@@ -22,7 +22,9 @@ const CRM_TABS = {
     CONFIGURACOES: 'CONFIGURAÇÕES',
     ALERTAS: 'ALERTAS',
     // Aba de detecção de BOTs
-    BOT_DETECCOES: 'BOT_DETECCOES'
+    BOT_DETECCOES: 'BOT_DETECCOES',
+    // Aba de feedback do sistema de aprendizado
+    FEEDBACK_LOG: 'FEEDBACK_LOG'
 };
 
 class CrmSheets {

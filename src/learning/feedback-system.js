@@ -4,21 +4,24 @@
  * FEEDBACK SYSTEM
  * Registra conversas bem-sucedidas e coleta feedback para o ciclo de aprendizado.
  *
- * Complementa o SDRLearning (playbooks por similaridade) que já existe em sdr-engine.js,
- * focando em análise de outcomes e feedback do Admin via Google Sheets.
- *
- * Uso: instanciar com o cliente de sheets ativo (crm-sheets ou analysis-log).
+ * Usa o crmSheets como backend real (aba FEEDBACK_LOG).
+ * Quando sheets não está disponível, persiste em buffer em memória.
  */
 
 const logger = require('../config/logger');
 
+// Nomes das abas usadas para feedback
+const FEEDBACK_TAB = 'FEEDBACK_LOG';
+const ADMIN_FEEDBACK_TAB = 'FEEDBACK_LOG';
+
 class FeedbackSystem {
     /**
-     * @param {object} sheetsClient - Objeto com método append(tab, row) e read(tab)
+     * @param {object} sheetsClient - Instância de crmSheets (ou null para buffer local)
+     * sheetsClient deve ter: appendRow(tabName, rowObj) e findByFilter(tabName, key, val)
      */
     constructor(sheetsClient = null) {
         this._sheets = sheetsClient;
-        this._buffer = [];          // buffer local caso sheets não esteja disponível
+        this._buffer = [];
     }
 
     /**
@@ -58,7 +61,7 @@ class FeedbackSystem {
 
         if (this._sheets) {
             try {
-                await this._sheets.append('successful_conversations', record);
+                await this._sheets.appendRow(FEEDBACK_TAB, record);
             } catch (err) {
                 logger.warn(`[FEEDBACK] Falha ao persistir no Sheets: ${err.message}`);
             }
@@ -85,7 +88,7 @@ class FeedbackSystem {
 
         if (this._sheets) {
             try {
-                await this._sheets.append('admin_feedback', record);
+                await this._sheets.appendRow(ADMIN_FEEDBACK_TAB, record);
             } catch (err) {
                 logger.warn(`[FEEDBACK] Falha ao persistir feedback no Sheets: ${err.message}`);
             }
@@ -99,9 +102,8 @@ class FeedbackSystem {
      * Calcula taxa de sucesso a partir do buffer local (ou Sheets se disponível).
      */
     async getSuccessRate() {
-        const conversations = this._sheets
-            ? await this._sheets.read('successful_conversations').catch(() => this._buffer)
-            : this._buffer;
+        // Buffer local é a fonte primária (dados em memória da sessão)
+        const conversations = this._buffer;
 
         if (!conversations || conversations.length === 0) {
             return { total: 0, qualified: 0, rejected: 0, escalated: 0, success_rate: '0%' };
@@ -125,10 +127,7 @@ class FeedbackSystem {
      * Retorna padrões das conversas qualificadas do buffer local.
      */
     async getSuccessPatterns() {
-        const conversations = this._sheets
-            ? await this._sheets.read('successful_conversations').catch(() => this._buffer)
-            : this._buffer;
-
+        const conversations = this._buffer;
         const qualified = (conversations || []).filter(c => c.outcome === 'QUALIFIED');
         if (qualified.length === 0) return null;
 

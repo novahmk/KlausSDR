@@ -15,8 +15,9 @@ const notificationBuilder = require('../escalation/notification-builder');
 const sessionManager = require('../session/session-manager');
 const FeedbackSystem = require('../learning/feedback-system');
 const patternAnalyzer = require('../learning/pattern-analyzer');
+const { crmSheets } = require('../sheets/crm-sheets');
 
-const feedbackSystem = new FeedbackSystem();
+const feedbackSystem = new FeedbackSystem(crmSheets);
 
 const DUE_FOLLOWUPS = [1, 5, 10];
 
