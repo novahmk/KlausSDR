@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Testes unitários para src/utils/escape-strategy.js
+ * Testes unitários para src/security/escape-strategy.js
  *
  * Cobertura principal:
  *  1. Tenta SMS antes de escalar para humano
@@ -68,7 +68,7 @@ describe('EscapeStrategy — Canal SMS primário', () => {
         jest.resetModules();
 
         // Re-importar com cache limpo para estado do singleton (escapeAttempts = {})
-        escapeStrategy = require('../../src/utils/escape-strategy');
+        escapeStrategy = require('../../src/security/escape-strategy');
         securitySheets = require('../../src/sheets/security-sheets').securitySheets;
 
         mockMessageCreate.mockReset();
@@ -127,7 +127,7 @@ describe('EscapeStrategy — Escalamento para operador humano', () => {
         delete process.env.SLACK_WEBHOOK_ESCALATION;
 
         jest.resetModules();
-        escapeStrategy = require('../../src/utils/escape-strategy');
+        escapeStrategy = require('../../src/security/escape-strategy');
         securitySheets = require('../../src/sheets/security-sheets').securitySheets;
         securitySheets.createAlert.mockReset();
         securitySheets.appendAuditLog.mockReset();
@@ -187,7 +187,7 @@ describe('EscapeStrategy — Respeitar maxRetries', () => {
         delete process.env.TWILIO_AUTH_TOKEN;
 
         jest.resetModules();
-        escapeStrategy = require('../../src/utils/escape-strategy');
+        escapeStrategy = require('../../src/security/escape-strategy');
         securitySheets = require('../../src/sheets/security-sheets').securitySheets;
         securitySheets.createAlert.mockReset();
     });

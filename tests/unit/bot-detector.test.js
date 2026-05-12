@@ -16,7 +16,7 @@ jest.mock('../../src/config/logger', () => ({
     error: jest.fn()
 }));
 
-const botDetector = require('../../src/utils/bot-detector');
+const botDetector = require('../../src/security/bot-detector');
 
 describe('BotDetector', () => {
 
