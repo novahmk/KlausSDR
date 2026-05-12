@@ -504,20 +504,31 @@ class SDREngine {
 
         // Registro de aprendizado quando lead é qualificado (HANDOFF)
         if (escalationEval.action === 'HANDOFF') {
-            feedbackSystem.recordSuccessfulConversation({
-                numero: lead.numero,
-                fase: analise.fase || fase,
-                personas_used: persona ? persona.nome : '',
-                playbooks_used: '',
-                message_count: (Array.isArray(lead.historico) ? lead.historico.length : 0) + 1,
-                score: analise.scoreEstimado || this._estimateLeadScore(lead),
-                time_to_outcome_ms: null
+            // Aguarda para garantir registro antes de consultar a taxa
+            await feedbackSystem.recordSuccessfulConversation({
+                lead: {
+                    numero: lead.numero,
+                    id: lead.numero,
+                    nome: lead.nome,
+                    score: analise.scoreEstimado || this._estimateLeadScore(lead),
+                    objecoes: lead.objecoes || []
+                },
+                conversation: multiTurnHistorico,
+                outcome: {
+                    type: 'QUALIFIED',
+                    personas: persona ? [persona.nome || persona.key] : [],
+                    playbooks: [],
+                    duration: 0
+                }
             });
 
             // A cada 10 conversas bem-sucedidas, rodar análise de padrões
-            const feedbackStats = feedbackSystem.getSuccessRate();
-            if (feedbackStats.total > 0 && feedbackStats.total % 10 === 0) {
-                const patterns = patternAnalyzer.analyzeSuccessPatterns(feedbackSystem.getSuccessPatterns());
+            const feedbackStats = await feedbackSystem.getSuccessRate();
+            if (feedbackStats && feedbackStats.total > 0 && feedbackStats.total % 10 === 0) {
+                const successPatterns = await feedbackSystem.getSuccessPatterns();
+                const patterns = patternAnalyzer.analyzeSuccessPatterns(
+                    Array.isArray(successPatterns) ? successPatterns : []
+                );
                 logger.info(`[SDR] Análise de padrões (${feedbackStats.total} conversas): ${JSON.stringify(patterns.recommendations || [])}`);
             }
         }

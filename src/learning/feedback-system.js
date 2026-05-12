@@ -27,7 +27,19 @@ class FeedbackSystem {
      * @param {Array<{role,content}>} conversation
      * @param {{ type: string, personas?: string[], playbooks?: string[], duration?: number }} outcome
      */
-    async recordSuccessfulConversation(lead, conversation, outcome) {
+    /**
+     * Registrar conversa com outcome definido (QUALIFIED, REJECTED, ESCALATED).
+     * Aceita um único objeto com todos os dados.
+     * @param {object} params - { lead, conversation, outcome }
+     */
+    async recordSuccessfulConversation(params) {
+        const { lead, conversation, outcome } = params || {};
+
+        if (!lead || !outcome) {
+            logger.warn('[FEEDBACK] recordSuccessfulConversation: parâmetros inválidos (lead e outcome são obrigatórios)');
+            return null;
+        }
+
         const record = {
             timestamp: new Date().toISOString(),
             lead_id: lead.numero || lead.id,
@@ -35,7 +47,7 @@ class FeedbackSystem {
             outcome: outcome.type,
             score: lead.score || 0,
             message_count: Array.isArray(conversation) ? conversation.length : 0,
-            conversation_summary: this._summarize(conversation),
+            conversation_summary: this._summarize(conversation || []),
             personas_used: (outcome.personas || []).join(','),
             playbooks_used: (outcome.playbooks || []).join(','),
             time_to_outcome_ms: outcome.duration || 0,
