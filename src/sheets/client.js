@@ -142,6 +142,124 @@ class GoogleSheetsClient {
     }
 
     /**
+     * Rename a sheet tab using the Google Sheets batchUpdate API.
+     * @param {string} oldName
+     * @param {string} newName
+     * @returns {Promise<boolean>}
+     */
+    async renameSheet(oldName, newName) {
+        const sourceName = String(oldName || '').trim();
+        const targetName = String(newName || '').trim();
+
+        if (!sourceName || !targetName) {
+            logger.info('[GoogleSheetsClient] renameSheet aborted: invalid sheet name(s)');
+            return false;
+        }
+
+        if (sourceName === targetName) {
+            logger.info(`[GoogleSheetsClient] renameSheet skipped: "${sourceName}" already matches target name`);
+            return true;
+        }
+
+        try {
+            const sheets = await this._getSheets();
+            const metadata = await sheets.spreadsheets.get({
+                spreadsheetId: this.spreadsheetId,
+                fields: 'sheets(properties(sheetId,title))'
+            });
+
+            const sheet = (metadata.data.sheets || []).find(item => item.properties?.title === sourceName);
+            if (!sheet) {
+                logger.info(`[GoogleSheetsClient] renameSheet aborted: sheet not found "${sourceName}"`);
+                return false;
+            }
+
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId: this.spreadsheetId,
+                resource: {
+                    requests: [{
+                        updateSheetProperties: {
+                            properties: {
+                                sheetId: sheet.properties.sheetId,
+                                title: targetName
+                            },
+                            fields: 'title'
+                        }
+                    }]
+                }
+            });
+
+            this._headersCache = {};
+            logger.info(`[GoogleSheetsClient] Renamed sheet "${sourceName}" to "${targetName}"`);
+            return true;
+        } catch (err) {
+            logger.info(`[GoogleSheetsClient] renameSheet failed for "${sourceName}" -> "${targetName}": ${err.message}`);
+            return false;
+        }
+    }
+
+    /**
+     * Create a new sheet tab and seed the first row with headers using batchUpdate.
+     * @param {string} sheetName
+     * @param {Array<string>} headers
+     * @returns {Promise<boolean>}
+     */
+    async createSheet(sheetName, headers = []) {
+        const targetName = String(sheetName || '').trim();
+        const normalizedHeaders = Array.isArray(headers)
+            ? headers.map(header => String(header || '').trim()).filter(Boolean)
+            : [];
+
+        if (!targetName) {
+            logger.info('[GoogleSheetsClient] createSheet aborted: invalid sheet name');
+            return false;
+        }
+
+        try {
+            const sheets = await this._getSheets();
+            const sheetId = Number(`${Date.now()}${Math.floor(Math.random() * 1000)}`) % 2147483647;
+
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId: this.spreadsheetId,
+                resource: {
+                    requests: [
+                        {
+                            addSheet: {
+                                properties: {
+                                    title: targetName,
+                                    sheetId
+                                }
+                            }
+                        },
+                        {
+                            updateCells: {
+                                start: {
+                                    sheetId,
+                                    rowIndex: 0,
+                                    columnIndex: 0
+                                },
+                                rows: [{
+                                    values: normalizedHeaders.map(header => ({
+                                        userEnteredValue: { stringValue: header }
+                                    }))
+                                }],
+                                fields: 'userEnteredValue'
+                            }
+                        }
+                    ]
+                }
+            });
+
+            this._headersCache = {};
+            logger.info(`[GoogleSheetsClient] Created sheet "${targetName}" with ${normalizedHeaders.length} header(s)`);
+            return true;
+        } catch (err) {
+            logger.info(`[GoogleSheetsClient] createSheet failed for "${targetName}": ${err.message}`);
+            return false;
+        }
+    }
+
+    /**
      * Query a range with filters and optional sort
      * @param {string} range
      * @param {Object} filters - { columnName: value }
