@@ -12,6 +12,7 @@ class GoogleSheetsClient {
         this.spreadsheetId = process.env.GOOGLE_SHEETS_ID;
         this._sheets = null;
         this._auth = null;
+        this._headersCache = {}; // tabName -> string[] (cached per process lifetime)
     }
 
     /**
@@ -54,7 +55,7 @@ class GoogleSheetsClient {
     }
 
     /**
-     * Append a single row (object → values array)
+     * Append a single row (object → values array mapped to sheet column order)
      * @param {string} range - e.g. 'Task Queue!A:K'
      * @param {Object} rowObj - key-value row
      * @returns {number} updated rows count
@@ -63,14 +64,33 @@ class GoogleSheetsClient {
         logger.debug(`Appending to: ${range}`);
         const sheets = await this._getSheets();
 
+        // Derive tab name from range (e.g. "LEADS!A:Z" → "LEADS")
+        const tabName = range.split('!')[0];
+        const sheetHeaders = await this._getTabHeaders(tabName);
+
+        let row;
+        if (sheetHeaders.length > 0) {
+            // Map values to the correct column order based on real sheet headers
+            row = sheetHeaders.map(h => {
+                const normalizedH = String(h).toLowerCase().trim().replace(/\s+/g, '_');
+                const originalH = String(h).trim();
+                // Try normalized key first, then original, then lowercase original
+                const val = rowObj[normalizedH] ?? rowObj[originalH] ?? rowObj[originalH.toLowerCase()] ?? '';
+                return val === null || val === undefined ? '' : val;
+            });
+        } else {
+            // No headers found yet (empty sheet) — insert in object order
+            row = Object.values(rowObj);
+        }
+
         const resp = await sheets.spreadsheets.values.append({
             spreadsheetId: this.spreadsheetId,
             range,
             valueInputOption: 'USER_ENTERED',
-            resource: { values: [Object.values(rowObj)] }
+            resource: { values: [row] }
         });
 
-        return resp.data.updates.updatedRows;
+        return resp.data.updates?.updatedRows || 0;
     }
 
     /**
@@ -135,7 +155,11 @@ class GoogleSheetsClient {
         const headers = data[0];
         let rows = data.slice(1).map(row => {
             const obj = {};
-            headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+            headers.forEach((h, i) => {
+                // Normalize header: lowercase + underscores (e.g. "Lead ID" → "lead_id")
+                const key = String(h).toLowerCase().trim().replace(/\s+/g, '_');
+                obj[key] = row[i] || '';
+            });
             return obj;
         });
 
@@ -167,6 +191,20 @@ class GoogleSheetsClient {
      */
     async findByColumn(range, column, value) {
         return this.queryRange(range, { [column]: value });
+    }
+
+    /**
+     * Fetch and cache the raw header row for a given tab.
+     * Cache lives for the process lifetime (headers rarely change).
+     * @param {string} tabName
+     * @returns {string[]}
+     */
+    async _getTabHeaders(tabName) {
+        if (this._headersCache[tabName]) return this._headersCache[tabName];
+        const data = await this.getRange(`${tabName}!1:1`);
+        const headers = data?.[0] || [];
+        this._headersCache[tabName] = headers;
+        return headers;
     }
 }
 

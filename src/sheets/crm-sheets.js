@@ -1,9 +1,11 @@
 /**
  * CRM Sheets Manager
  * Centraliza o acesso a todas as abas do sistema completo de SDR IA.
+ * Usa SafeSheets para garantir: headers normalizados, colunas corretas,
+ * sem loops, sem dados corrompidos.
  */
 
-const { GoogleSheetsClient } = require('./client');
+const { SafeSheets } = require('./safe-sheets');
 const logger = require('../config/logger');
 
 // Nomes extatos das abas que você deve ter na sua planilha
@@ -15,78 +17,76 @@ const CRM_TABS = {
     FOLLOW_UP: 'FOLLOW-UP',
     TEMPLATES: 'TEMPLATES',
     PENSAMENTO_IA: 'PENSAMENTO_IA',
-    // Abas de segurança & compliance (adicionadas no sistema anti-spam)
+    // Abas de segurança & compliance
     SEGURANCA: 'SEGURANÇA',
     RATE_LIMIT: 'RATE_LIMIT',
     AUDIT_LOG: 'AUDIT_LOG',
     CONFIGURACOES: 'CONFIGURAÇÕES',
-    ALERTAS: 'ALERTAS',
+    ALERTAS: 'ALERTA',
     // Aba de detecção de BOTs
-    BOT_DETECCOES: 'BOT_DETECCOES',
+    BOT_DETECCOES: 'BOT_DETECCAO',
     // Aba de feedback do sistema de aprendizado
     FEEDBACK_LOG: 'FEEDBACK_LOG'
 };
 
 class CrmSheets {
     constructor() {
-        this.client = new GoogleSheetsClient();
+        this._sheetId = process.env.GOOGLE_SHEETS_ID;
+        this._tabs = {}; // cache de instâncias SafeSheets por aba
     }
 
     /**
-     * Helper genérico para adicionar uma linha em qualquer aba CRM
-     * @param {string} tabName
-     * @param {Object} rowData
+     * Retorna (ou cria) instância SafeSheets para a aba.
+     */
+    _tab(tabName) {
+        if (!this._tabs[tabName]) {
+            this._tabs[tabName] = new SafeSheets(this._sheetId, tabName);
+        }
+        return this._tabs[tabName];
+    }
+
+    /**
+     * Adiciona uma linha — usa SafeSheets.writeData (nunca Object.values).
      */
     async appendRow(tabName, rowData) {
         logger.debug(`[CRM.Sheets] Inserindo registro em ${tabName}...`);
-        try {
-            await this.client.append(`${tabName}!A:Z`, rowData);
-            return true;
-        } catch (err) {
-            logger.error(`Erro ao inserir em ${tabName}: ${err.message}`);
-            return false;
-        }
+        return this._tab(tabName).writeData(rowData);
     }
 
     /**
-     * Busca dados baseados em um filtro (ex: Lead ID)
-     * @param {string} tabName 
-     * @param {string} filterKey 
-     * @param {string} filterValue 
+     * Busca dados filtrando por coluna. Aceita telefone +55 ou sem.
      */
     async findByFilter(tabName, filterKey, filterValue) {
-        try {
-            const rows = await this.client.queryRange(`${tabName}!A:Z`);
-            return rows.filter(r => String(r[filterKey]) === String(filterValue));
-        } catch (err) {
-            return [];
-        }
+        return this._tab(tabName).findByColumn(filterKey, filterValue);
     }
 
     /**
-     * Busca UMA linha pelo Lead ID
+     * Busca UMA linha pelo Lead ID.
      */
     async getOneByLeadId(tabName, leadId) {
-        const rows = await this.findByFilter(tabName, 'lead id', leadId);
+        const rows = await this.findByFilter(tabName, 'lead_id', leadId);
         return rows[0] || null;
     }
 
     /**
-     * Busca múltiplos registros por Lead ID (ex: Interações)
+     * Busca múltiplos registros por Lead ID.
      */
     async getManyByLeadId(tabName, leadId) {
-        return await this.findByFilter(tabName, 'lead id', leadId);
+        return this.findByFilter(tabName, 'lead_id', leadId);
     }
 
     /**
-     * Busca todos os registros crus (Array 2D)
+     * Retorna dados crus (Array 2D) — compatibilidade retroativa.
      */
     async getAll(tabName) {
-        try {
-            return await this.client.getRange(`${tabName}!A:Z`);
-        } catch (err) {
-            return [];
-        }
+        return this._tab(tabName).getRaw();
+    }
+
+    /**
+     * Valida se colunas esperadas existem na aba.
+     */
+    async validateTab(tabName, expectedHeaders) {
+        return this._tab(tabName).validateColumns(expectedHeaders);
     }
 }
 

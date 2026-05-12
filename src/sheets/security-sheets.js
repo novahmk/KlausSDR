@@ -12,7 +12,7 @@ const SECURITY_TABS = {
     RATE_LIMIT: 'RATE_LIMIT',
     AUDIT_LOG: 'AUDIT_LOG',
     CONFIGURACOES: 'CONFIGURAÇÕES',
-    ALERTAS: 'ALERTAS'
+    ALERTAS: 'ALERTA'
 };
 
 // Default thresholds if CONFIGURAÇÕES sheet is unavailable

@@ -16,7 +16,9 @@ class SDRScheduler {
         this._whatsappClient = whatsappClient || this._whatsappClient;
         if (this._running) return;
         this._running = true;
-        this._scheduleNextRun(true);
+        // Não rodar imediatamente para evitar follow-ups disparados na reconexão/reinício.
+        // O primeiro scan acontece apenas na hora configurada (SDR_DAILY_FOLLOWUP_HOUR).
+        this._scheduleNextRun(false);
         logger.info('[SDR Scheduler] Agendador de follow-up iniciado.');
     }
 

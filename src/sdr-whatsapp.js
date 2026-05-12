@@ -58,6 +58,7 @@ class SDRWhatsAppSystem {
         this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         this.isAuthenticated = false;
         this.isReady = false;
+        this._isFirstReady = true; // distingue 1ª conexão de reconexões
 
         // Cliente WhatsApp Web (QR Code)
         this.whatsapp = new Client({
@@ -87,8 +88,22 @@ class SDRWhatsAppSystem {
             this.isAuthenticated = true;
         });
 
+        this.whatsapp.on('disconnected', (reason) => {
+            logger.warn(`[SDR IA] WhatsApp desconectado: ${reason}. Aguardando reconexão automática...`);
+            this.isReady = false;
+            this.isAuthenticated = false;
+        });
+
+        this.whatsapp.on('auth_failure', (msg) => {
+            logger.error(`[SDR IA] Falha de autenticação WhatsApp: ${msg}`);
+            this.isReady = false;
+            this.isAuthenticated = false;
+        });
+
         this.whatsapp.on('ready', () => {
-            logger.info('🟢 [SDR IA] Sistema SDR pronto para disparar/escutar mensagens!');
+            const isReconnection = !this._isFirstReady;
+            this._isFirstReady = false;
+            logger.info(`🟢 [SDR IA] Sistema SDR pronto${isReconnection ? ' (reconexão)' : ''}!`);
             this.isReady = true;
             SYSTEM_ACTIVATION = sessionManager.onReady();
             logger.info(`[SDR IA] SYSTEM_ACTIVATION atualizado: ${new Date(SYSTEM_ACTIVATION).toISOString()}`);
@@ -99,9 +114,12 @@ class SDRWhatsAppSystem {
                 logger.warn(`[SDR IA] Erro ao registar reconexão segura: ${err.message}`)
             );
             // Ao reconectar, reprocessa mensagens que ficaram em fila por rate limit
-            this._processarFilaEnfileirada().catch(err =>
-                logger.warn(`[SDR IA] Erro ao processar fila pós-reconexão: ${err.message}`)
-            );
+            // Apenas em reconexões reais (não na primeira inicialização)
+            if (isReconnection) {
+                this._processarFilaEnfileirada().catch(err =>
+                    logger.warn(`[SDR IA] Erro ao processar fila pós-reconexão: ${err.message}`)
+                );
+            }
         });
 
         // Quando o cliente responde pelo WhatsApp
@@ -148,7 +166,7 @@ class SDRWhatsAppSystem {
         }
 
         // Limpar o número para encontrar no Google Sheets
-        const telefoneNumero = telefoneId.replace('@c.us', '').replace(/\D/g, '');
+        const telefoneNumero = this._normalizarTelefone(telefoneId.replace('@c.us', ''));
 
         let textoEntrada = String(corpo || '').trim();
         let audioContext = '';
@@ -427,13 +445,13 @@ class SDRWhatsAppSystem {
         if (leads.length < 2) return;
 
         const headers = leads[0].map(h => String(h).toLowerCase());
-        const idIdx = headers.findIndex(h => h.includes('id') || h === 'lead_id');
+        const idIdx = headers.findIndex(h => h === 'lead_id' || h === 'lead id' || h === 'id' || h === 'telefone');
         const nomeIdx = headers.findIndex(h => h.includes('nome'));
         const criadoIdx = headers.findIndex(h => h.includes('data_criacao') || h.includes('created_at') || h.includes('datacriacao'));
 
         for (let r = 1; r < leads.length; r++) {
             const row = leads[r];
-            const telefone = row[idIdx]?.replace(/\D/g, '');
+            const telefone = this._normalizarTelefone(row[idIdx]);
             const nome = row[nomeIdx] || 'Comercial';
 
             if (!telefone) continue;
@@ -470,6 +488,7 @@ class SDRWhatsAppSystem {
                 try {
                     await this._simulateTypingDelay(`${telefone}@c.us`, primeiraMsg);
                     await this.whatsapp.sendMessage(`${telefone}@c.us`, primeiraMsg);
+                    logger.info(`[SDR IA] ✅ Primeira abordagem enviada para ${nome} (${telefone})`);
 
                     // Salva
                     await crmSheets.appendRow(CRM_TABS.INTERACOES, {
@@ -491,7 +510,7 @@ class SDRWhatsAppSystem {
                     // Pause
                     await new Promise(res => setTimeout(res, 2000));
                 } catch (err) {
-                    logger.error(`Não foi possivel mandar whatsapp para ${telefone}`);
+                    logger.error(`[SDR IA] ❌ Falha ao enviar para ${telefone} (${nome}): ${err.message}`);
                 }
             }
         }
@@ -585,6 +604,20 @@ Direta, breve (3 linhas máx), valor claro. APENAS a mensagem:`;
         }
 
         await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // Normaliza número de telefone garantindo código do país (BR=55)
+    // ─────────────────────────────────────────────────────────
+
+    _normalizarTelefone(raw) {
+        const digits = String(raw || '').replace(/\D/g, '');
+        if (!digits) return '';
+        // Já tem código de país (começa com 55 e tem 12-13 dígitos)
+        if (digits.startsWith('55') && digits.length >= 12) return digits;
+        // Número brasileiro sem código de país (10-11 dígitos)
+        if (digits.length >= 10 && digits.length <= 11) return `55${digits}`;
+        return digits;
     }
 
     // ─────────────────────────────────────────────────────────
