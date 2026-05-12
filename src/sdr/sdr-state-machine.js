@@ -10,6 +10,13 @@ const intentMatcher = require('./intent-matcher');
 const { EscalationRulesEngine } = require('../escalation/escalation-rules');
 const contextCache = require('../cache/context-cache');
 const contextCompressor = require('../cache/context-compressor');
+const personaSelector = require('../personas/persona-selector');
+const notificationBuilder = require('../escalation/notification-builder');
+const sessionManager = require('../session/session-manager');
+const FeedbackSystem = require('../learning/feedback-system');
+const patternAnalyzer = require('../learning/pattern-analyzer');
+
+const feedbackSystem = new FeedbackSystem();
 
 const DUE_FOLLOWUPS = [1, 5, 10];
 
@@ -27,9 +34,16 @@ class SDRStateMachine {
         analysis = {},
         currentDate = new Date(),
         audioContext = '',
-        whatsappClient = null
+        whatsappClient = null,
+        messageTimestamp = null
     }) {
         const leadKey = this._normalizeLeadId(leadId);
+
+        // Validação de sessão (M2) — descarta mensagens de sessões anteriores ao QR atual
+        if (messageTimestamp && !sessionManager.isMessageFromCurrentSession(messageTimestamp)) {
+            logger.info(`[SDR State] Mensagem de sessão anterior ignorada para ${leadKey}`);
+            return null;
+        }
 
         // Early-return: intent simples resolvido sem chamar GPT-4o
         if (!audioContext) {
@@ -105,11 +119,27 @@ class SDRStateMachine {
             ? `ATENÇÃO: Responda de forma natural e diferente das mensagens anteriores. Evite repetir frases, aberturas ou call-to-actions já usados. Mensagens anteriores enviadas: ${JSON.stringify(previousReplies)}`
             : 'ATENÇÃO: Responda de forma natural e humana. Evite frases genéricas ou repetitivas.';
 
+        // Selecionar persona dinâmica (M1)
+        const _stageToFase = { TOP_OF_FUNNEL: 'fase_1_abordagem', MIDDLE_OF_FUNNEL: 'fase_2_qualificacao', BOTTOM_OF_FUNNEL: 'fase_3_conversao' };
+        const persona = personaSelector.select({
+            fase: _stageToFase[updatedState.current_funnel_stage] || 'fase_2_qualificacao',
+            objecao: updatedState.addObjection || '',
+            score: (analysis && analysis.scoreEstimado != null) ? analysis.scoreEstimado : 50,
+            numObjecoes: (leadStateStore.getLead(leadKey).objections_met || []).length
+        });
+        const personaBlock = personaSelector.generatePromptBlock(persona, {
+            ultimaResposta: currentText,
+            fluxo: updatedState.current_funnel_stage,
+            nome: leadMeta.decisor_name || leadMeta.nome
+        });
+        const enrichedSystemPrompt = `${this.systemPrompt}\n\n${personaBlock}`;
+        logger.info(`[SDR State] Persona: ${persona.key} (matchScore: ${persona.matchScore}) para lead ${leadKey}`);
+
         try {
             const completion = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
                 messages: [
-                    { role: 'system', content: this.systemPrompt },
+                    { role: 'system', content: enrichedSystemPrompt },
                     {
                         role: 'user',
                         content: `${variabilityNote}\n\n${JSON.stringify(promptPayload, null, 2)}`
@@ -133,7 +163,8 @@ class SDRStateMachine {
             const replyResult = {
                 reply,
                 state: leadStateStore.getLead(leadKey),
-                stage: updatedState.current_funnel_stage
+                stage: updatedState.current_funnel_stage,
+                persona: persona.key
             };
             const cacheKey = `${leadKey}::${String(currentText).trim()}`;
             contextCache.set(cacheKey, replyResult);
@@ -145,7 +176,8 @@ class SDRStateMachine {
                 analysis,
                 stage: updatedState.current_funnel_stage,
                 whatsappClient,
-                reason: 'TRANSICAO_HUMANA'
+                reason: 'TRANSICAO_HUMANA',
+                personaUsed: persona.key
             });
 
             return replyResult;
@@ -234,7 +266,7 @@ class SDRStateMachine {
         return reply;
     }
 
-    async evaluateForHumanTransition({ leadId, leadMeta = {}, currentText = '', analysis = {}, whatsappClient = null, reason = 'TRANSICAO_HUMANA' }) {
+    async evaluateForHumanTransition({ leadId, leadMeta = {}, currentText = '', analysis = {}, whatsappClient = null, reason = 'TRANSICAO_HUMANA', personaUsed = '' }) {
         const leadKey = this._normalizeLeadId(leadId);
         const currentState = leadStateStore.getLead(leadKey);
         const stage = currentState.current_funnel_stage || 'TOP_OF_FUNNEL';
@@ -244,18 +276,61 @@ class SDRStateMachine {
         }
 
         const shouldNotify = this._shouldEscalateToHuman({ currentText, analysis, leadMeta, stage });
-
         if (!shouldNotify) return false;
 
+        // Avaliação estruturada para notificação enriquecida (M3)
+        const leadForEval = {
+            ...leadMeta,
+            interacoes: (currentState.history || []).length,
+            objecoes: currentState.objections_met || [],
+            score: (analysis && analysis.scoreEstimado) || 50,
+            decisor_contact: leadMeta.decisor_contact || leadKey
+        };
+        const evaluation = EscalationRulesEngine.evaluate(leadForEval, { currentText, analysis, stage });
+
+        // Construir notificação estruturada via NotificationBuilder (M3)
+        const structuredNotification = evaluation.action === 'HANDOFF'
+            ? notificationBuilder.buildQualifiedLeadNotification(leadForEval, evaluation)
+            : notificationBuilder.buildEscalationNotification(leadForEval, {
+                ...evaluation,
+                reason: evaluation.reason || reason
+            });
+
+        logger.info(`[SDR State] Notificação estruturada: ${structuredNotification.type} — ${structuredNotification.metadata?.reason || reason}`);
+
         leadStateStore.markHumanTransitionNotified(leadKey);
+
+        // Registrar conversa qualificada no feedback system (Bloco 7 / M1)
+        if (evaluation.action === 'HANDOFF') {
+            await feedbackSystem.recordSuccessfulConversation({
+                lead: { ...leadForEval, numero: leadKey },
+                conversation: currentState.history || [],
+                outcome: {
+                    type: 'QUALIFIED',
+                    personas: personaUsed ? [personaUsed] : [],
+                    playbooks: [],
+                    duration: 0
+                }
+            });
+
+            const stats = await feedbackSystem.getSuccessRate();
+            if (stats && stats.total > 0 && stats.total % 10 === 0) {
+                const successPatterns = await feedbackSystem.getSuccessPatterns();
+                const patterns = patternAnalyzer.analyzeSuccessPatterns(
+                    Array.isArray(successPatterns) ? successPatterns : []
+                );
+                logger.info(`[LEARNING] Padrões (${stats.total} conversas): ${JSON.stringify(patterns.recommendations || [])}`);
+            }
+        }
+
         await this._notifyAdminPayload({
             leadId: leadKey,
             leadMeta,
-            reason,
+            reason: structuredNotification.escalation_reason?.reason || evaluation.reason || reason,
             currentText,
             analysis,
             whatsappClient,
-            action: 'LIGAR_AGORA'
+            action: evaluation.action === 'HANDOFF' ? 'LIGAR_AGORA' : 'VERIFICAR'
         });
         return true;
     }
