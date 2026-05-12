@@ -321,8 +321,9 @@ class SDRWhatsAppSystem {
             return;
         }
 
-        // 4. Analisar Mensagem via GPT-4o
-        const analise = await this._analisarMensagem(textoEntrada, leadNome);
+        // 4. Inferir análise local (sem GPT) — sentimento, tipo e objeção via regex
+        // A chamada GPT real acontece uma única vez em sdrStateMachine.generateReply() abaixo.
+        const analise = this._inferAnalise(textoEntrada);
 
         await this._notifyCallIfNeeded({
             telefoneNumero,
@@ -501,35 +502,51 @@ class SDRWhatsAppSystem {
     // ============================================
 
     async _analisarMensagem(corpo, nomeLead) {
-        const prompt = `Analise a mensagem de um lead e identifique:
-1. Sentimento: positivo, neutro, negativo
-2. Tipo: objeção, resposta_positiva, pergunta, nao_resposta
-3. Objeção específica: qualé_interesse, nao_interesse, sem_contacto, fornecedor_existente, satisfeito, sem_budget, enviar_email, nao_eh_momento
-4. Proximidade com ICP: alto, medio, baixo
+        // @deprecated — substituído por _inferAnalise() para eliminar chamada GPT duplicada (C4).
+        // Mantido para retrocompatibilidade. Não chamar em novos fluxos.
+        return this._inferAnalise(corpo);
+    }
 
-Mensagem: "${corpo}"
-Chame o Lead de: ${nomeLead}
+    /**
+     * Inferir análise da mensagem do lead via regex (0 tokens, 0 latência).
+     * Produz o mesmo schema de _analisarMensagem sem chamar o GPT.
+     * @param {string} texto
+     * @returns {{ sentimento: string, tipo: string, objecao: string, proximidadeICP: string }}
+     */
+    _inferAnalise(texto) {
+        const t = String(texto || '').toLowerCase();
 
-Responda APENAS em JSON:
-{
-  "sentimento": "...",
-  "tipo": "...",
-  "objecao": "...",
-  "proximidadeICP": "..."
-}`;
-        try {
-            const comp = await this.openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
-                    { role: 'user', content: prompt }
-                ],
-                response_format: { type: 'json_object' }
-            });
-            return JSON.parse(comp.choices[0].message.content);
-        } catch {
-            return { sentimento: 'neutro', tipo: 'pergunta' };
+        let sentimento = 'neutro';
+        let tipo = 'pergunta';
+        let objecao = '';
+        let proximidadeICP = 'medio';
+
+        // Sentimento
+        if (/interessad|agendar|marcar|quero saber|me conta|pode ser|gostei|ótimo|excelente|claro|combinado/.test(t)) sentimento = 'positivo';
+        else if (/não|nao|sem interesse|me tira|para de|recuso|não quero/.test(t)) sentimento = 'negativo';
+
+        // Tipo
+        if (/agenda|marcar|reunião|reuniao|call|horário|horario|pode ser|combinado|confirmo|segunda|terça|terca/.test(t)) {
+            tipo = 'resposta_positiva'; sentimento = 'positivo';
+        } else if (/sem interesse|não tenho interesse|nao tenho interesse|não quero|nao quero|email|e-mail|fornecedor|orçamento|orcamento|satisfeito/.test(t)) {
+            tipo = 'objeção';
+        } else if (/\?|quando|como|quanto|qual|onde/.test(t)) {
+            tipo = 'pergunta';
         }
+
+        // Objeção específica
+        if (/email|e-mail/.test(t)) objecao = 'enviar_email';
+        else if (/fornecedor|agência|agencia/.test(t)) objecao = 'fornecedor_existente';
+        else if (/orçamento|orcamento|budget|verba/.test(t)) objecao = 'sem_budget';
+        else if (/sem interesse|não tenho interesse|nao tenho interesse|não quero|nao quero/.test(t)) objecao = 'nao_interesse';
+        else if (/satisfeito|está bom|esta bom/.test(t)) objecao = 'satisfeito';
+        else if (/atendente|não posso passar|nao posso passar|não sou o responsável/.test(t)) objecao = 'sem_contacto';
+
+        // Proximidade ICP
+        if (tipo === 'resposta_positiva') proximidadeICP = 'alto';
+        else if (objecao) proximidadeICP = 'baixo';
+
+        return { sentimento, tipo, objecao, proximidadeICP };
     }
 
     async _gerarPrimeiraAbordagem(nome) {
