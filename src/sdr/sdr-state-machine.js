@@ -3,7 +3,7 @@
 const { OpenAI } = require('openai');
 const logger = require('../config/logger');
 const env = require('../config/env');
-const leadStateStore = require('./sdr-state-store');
+const leadStateStore = require('../core/sdr-state-store');
 const remoteControl = require('./sdr-remote-control');
 const { loadSdrSystemPrompt } = require('../openai/sdr-prompt-loader');
 const intentMatcher = require('./intent-matcher');

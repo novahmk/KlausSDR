@@ -6,17 +6,17 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { OpenAI } = require('openai');
-const { crmSheets, CRM_TABS } = require('../sheets/crm-sheets');
-const logger = require('../config/logger');
-const { detectMediaType, transcribeAudio, createAudioContext } = require('../utils/media-transcriber');
-const env = require('../config/env');
-const remoteControl = require('./sdr-remote-control');
-const sdrStateMachine = require('./sdr-state-machine');
-const securityValidator = require('./security-validator');
-const botDetector = require('../utils/bot-detector');
-const escapeStrategy = require('../utils/escape-strategy');
-const { securitySheets } = require('../sheets/security-sheets');
-const intentMatcher = require('./intent-matcher');
+const { crmSheets, CRM_TABS } = require('./sheets/crm-sheets');
+const logger = require('./config/logger');
+const { detectMediaType, transcribeAudio, createAudioContext } = require('./utils/media-transcriber');
+const env = require('./config/env');
+const remoteControl = require('./sdr/sdr-remote-control');
+const sdrStateMachine = require('./sdr/sdr-state-machine');
+const securityValidator = require('./security/security-validator');
+const botDetector = require('./security/bot-detector');
+const escapeStrategy = require('./security/escape-strategy');
+const { securitySheets } = require('./sheets/security-sheets');
+const intentMatcher = require('./sdr/intent-matcher');
 
 // ============================================
 // CONTROLE DE SESSÃO — apenas leads/mensagens da sessão atual

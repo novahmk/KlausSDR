@@ -12,10 +12,18 @@ require('dotenv').config();
 const env = require('./config/env');
 const logger = require('./config/logger');
 const stateManager = require('./core/state-manager');
-// DEPRECATED: orchestrator (ciclo multi-agente) não é utilizado no fluxo SDR ativo
-// const orchestrator = require('./core/orchestrator');
 const { separator } = require('./utils/formatters');
-const sdrScheduler = require('./core/sdr-scheduler');
+
+// Módulos SDR ativos
+const SDRWhatsApp = require('./sdr-whatsapp');
+const SDRStateMachine = require('./sdr/sdr-state-machine');
+const SDREngine = require('./openai/sdr-engine');
+const SecurityValidator = require('./security/security-validator');
+const IntentMatcher = require('./sdr/intent-matcher');
+const BotDetector = require('./security/bot-detector');
+const EscapeStrategy = require('./security/escape-strategy');
+const Scheduler = require('./sdr/sdr-scheduler');
+const RemoteControl = require('./sdr/sdr-remote-control');
 
 class IASystem {
     /**
@@ -38,32 +46,30 @@ class IASystem {
         stateManager.startCycle();
 
         try {
-            const sdrWhatsApp = require('./core/sdr-whatsapp');
-
             // 4. Inicializa o WhatsApp e espera ele pedir QR Code e Autenticar
             logger.info('Iniciando o subsistema WhatsApp SDR...');
-            await sdrWhatsApp.iniciar();
+            await SDRWhatsApp.iniciar();
 
             // Fica aguardando o cliente ficar verde (isReady = true)
             logger.info('⏳ Aguardando leitura do QR Code ou carregamento da sessão...');
-            while (!sdrWhatsApp.isReady) {
+            while (!SDRWhatsApp.isReady) {
                 await new Promise(r => setTimeout(r, 2000));
             }
 
-            sdrScheduler.start({ whatsappClient: sdrWhatsApp.whatsapp });
+            Scheduler.start({ whatsappClient: SDRWhatsApp.whatsapp });
 
             if (process.env.LOOP === 'true') {
                 const intervalMs = env.CYCLE_INTERVAL_MINUTES * 60 * 1000;
                 logger.info(`🔄 Loop ativo. O sistema de WhatsApp está escutando respostas... E checará novos leads na planilha a cada ${env.CYCLE_INTERVAL_MINUTES} minuto(s).`);
 
                 while (true) {
-                    await sdrWhatsApp.iniciarAbordagensDeNovosLeads();
+                    await SDRWhatsApp.iniciarAbordagensDeNovosLeads();
                     await new Promise(r => setTimeout(r, intervalMs));
                 }
             } else {
                 // Modo disparo apenas (lê e envia) e fica ouvindo
                 logger.info('Rotina SDR única... Lendo aba LEADS!');
-                await sdrWhatsApp.iniciarAbordagensDeNovosLeads();
+                await SDRWhatsApp.iniciarAbordagensDeNovosLeads();
                 logger.info('✅ Abordagens ativas enviadas. O SDR continuará rodando para responder a quem mandar mensagem no WhatsApp!!');
                 // IMPORTANTE: NÃO matamos o processo aqui, pois o webSocket do whatsapp precisa ficar ativo
                 // Só saímos se fechar via Terminal.
@@ -84,7 +90,7 @@ class IASystem {
      */
     stop() {
         logger.info('\n🛑 System shutting down...');
-        sdrScheduler.stop();
+        Scheduler.stop();
         stateManager.set('isRunning', false);
     }
 }
