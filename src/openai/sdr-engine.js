@@ -11,6 +11,7 @@ const logger = require('../config/logger');
 const analysisLog = require('../sheets/analysis-log');
 const contextCache = require('../cache/context-cache');
 const contextCompressor = require('../cache/context-compressor');
+const personaSelector = require('../personas/persona-selector');
 
 // ─── Inlined: sdr-learning ────────────────────────────────────────────────────
 const PLAYBOOK_FILE = path.join(__dirname, '..', '..', 'data', 'sdr_playbooks.json');
@@ -406,9 +407,18 @@ class SDREngine {
             return playbookResult;
         }
 
+        const persona = personaSelector.select({
+            fase,
+            objecao: this._extractObjecoes(lead, '')[0] || '',
+            score: this._estimateLeadScore(lead),
+            numObjecoes: this._extractObjecoes(lead, '').length
+        });
+        const personaBlock = personaSelector.generatePromptBlock(persona, lead);
+
         const systemPrompt = [
             SDR_SCRIPT,
             `\nCONTEXTO ESPECIALIZADO SDR:\n${sdrContext}`,
+            `\n${personaBlock}`,
             '\nDIRETRIZ DE ESTILO:',
             '- Seja criativo na formulacao da mensagem sem perder clareza e objetividade.',
             '- Evite respostas roboticas ou repetitivas; varie abertura e CTA dentro da fase.',
