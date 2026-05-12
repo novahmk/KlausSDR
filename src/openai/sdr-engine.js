@@ -12,6 +12,8 @@ const analysisLog = require('../sheets/analysis-log');
 const contextCache = require('../cache/context-cache');
 const contextCompressor = require('../cache/context-compressor');
 const personaSelector = require('../personas/persona-selector');
+const { EscalationRulesEngine } = require('../escalation/escalation-rules');
+const notificationBuilder = require('../escalation/notification-builder');
 
 // ─── Inlined: sdr-learning ────────────────────────────────────────────────────
 const PLAYBOOK_FILE = path.join(__dirname, '..', '..', 'data', 'sdr_playbooks.json');
@@ -482,6 +484,21 @@ class SDREngine {
             analise,
             origem: 'openai'
         };
+
+        // Enriquecer com avaliação de escalação (não altera fluxo existente)
+        const escalationEval = EscalationRulesEngine.evaluate(lead, { currentText: lead.ultimaResposta, analysis: analise, stage: fase });
+        if (escalationEval.action !== 'CONTINUE' && escalationEval.score >= 50) {
+            openaiResult.escalation = {
+                action: escalationEval.action,
+                reason: escalationEval.reason,
+                score: escalationEval.score,
+                notification: escalationEval.action === 'HANDOFF'
+                    ? notificationBuilder.buildQualifiedLeadNotification(lead, escalationEval)
+                    : notificationBuilder.buildEscalationNotification(lead, escalationEval)
+            };
+            logger.info(`[SDR] Escalação detectada: ${escalationEval.action} (${escalationEval.reason}, score=${escalationEval.score})`);
+        }
+
         contextCache.set(cacheKey, openaiResult);
         return openaiResult;
     }
