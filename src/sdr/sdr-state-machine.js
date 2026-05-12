@@ -7,6 +7,7 @@ const leadStateStore = require('../core/sdr-state-store');
 const remoteControl = require('./sdr-remote-control');
 const { loadSdrSystemPrompt } = require('../openai/sdr-prompt-loader');
 const intentMatcher = require('./intent-matcher');
+const { EscalationRulesEngine } = require('../escalation/escalation-rules');
 
 const DUE_FOLLOWUPS = [1, 5, 10];
 
@@ -380,7 +381,11 @@ class SDRStateMachine {
     }
 
     _shouldEscalateToHuman({ currentText, analysis, leadMeta, stage }) {
-        return this._isHumanRequest(String(currentText || '').toLowerCase(), analysis)
+        const ctx = { currentText, analysis, stage };
+        return EscalationRulesEngine.shouldHandoff(leadMeta || {}, ctx)
+            || EscalationRulesEngine.shouldEscalate(leadMeta || {}, ctx)
+            // Fallback para estágios antigos mantidos por compatibilidade
+            || this._isHumanRequest(String(currentText || '').toLowerCase(), analysis)
             || this._isComplexObjection(String(currentText || '').toLowerCase(), analysis)
             || this._isQualificationComplete({ currentText, leadMeta, analysis })
             || stage === 'BOTTOM_OF_FUNNEL';
