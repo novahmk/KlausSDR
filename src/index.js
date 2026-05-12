@@ -12,7 +12,8 @@ require('dotenv').config();
 const env = require('./config/env');
 const logger = require('./config/logger');
 const stateManager = require('./core/state-manager');
-const orchestrator = require('./core/orchestrator');
+// DEPRECATED: orchestrator (ciclo multi-agente) não é utilizado no fluxo SDR ativo
+// const orchestrator = require('./core/orchestrator');
 const { separator } = require('./utils/formatters');
 const sdrScheduler = require('./core/sdr-scheduler');
 

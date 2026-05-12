@@ -1,3 +1,9 @@
+/* DEPRECATED — Não utilizado no fluxo SDR ativo.
+ * Este arquivo foi parte do ciclo multi-agente Manager/Attendant (código-gerador).
+ * O fluxo SDR atual utiliza: sdr-whatsapp.js → sdr-state-machine.js → openai/sdr-engine.js
+ * Mantido apenas para referência histórica. Não instanciar em produção.
+ */
+
 /**
  * Manager Decision Maker
  * High-level strategic decisions about project direction

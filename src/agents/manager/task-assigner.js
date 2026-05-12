@@ -1,3 +1,9 @@
+/* DEPRECATED — Não utilizado no fluxo SDR ativo.
+ * Este arquivo foi parte do ciclo multi-agente Manager/Attendant (código-gerador).
+ * O fluxo SDR atual utiliza: sdr-whatsapp.js → sdr-state-machine.js → openai/sdr-engine.js
+ * Mantido apenas para referência histórica. Não instanciar em produção.
+ */
+
 /**
  * Manager Task Assigner
  * Generates task specs and validates Attendant code output
