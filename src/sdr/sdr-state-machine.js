@@ -8,6 +8,8 @@ const remoteControl = require('./sdr-remote-control');
 const { loadSdrSystemPrompt } = require('../openai/sdr-prompt-loader');
 const intentMatcher = require('./intent-matcher');
 const { EscalationRulesEngine } = require('../escalation/escalation-rules');
+const contextCache = require('../cache/context-cache');
+const contextCompressor = require('../cache/context-compressor');
 
 const DUE_FOLLOWUPS = [1, 5, 10];
 
@@ -31,6 +33,14 @@ class SDRStateMachine {
 
         // Early-return: intent simples resolvido sem chamar GPT-4o
         if (!audioContext) {
+            // Cache hit: mesma mensagem já processada recentemente (retry/duplicata)
+            const cacheKey = `${leadKey}::${String(currentText).trim()}`;
+            const cached = contextCache.get(cacheKey);
+            if (cached) {
+                logger.info(`[SDR State] Cache hit para ${leadKey} — reutilizando resposta anterior`);
+                return cached;
+            }
+
             const intentResult = intentMatcher.match(currentText);
             if (intentResult.matched) {
                 logger.info(`[SDR State] Intent '${intentResult.intent}' para lead ${leadKey} — resposta template (sem GPT)`);
@@ -119,6 +129,15 @@ class SDRStateMachine {
                 stage: updatedState.current_funnel_stage
             });
 
+            // Armazenar resposta no cache para deduplicação de retries
+            const replyResult = {
+                reply,
+                state: leadStateStore.getLead(leadKey),
+                stage: updatedState.current_funnel_stage
+            };
+            const cacheKey = `${leadKey}::${String(currentText).trim()}`;
+            contextCache.set(cacheKey, replyResult);
+
             await this.evaluateForHumanTransition({
                 leadId: leadKey,
                 leadMeta,
@@ -129,11 +148,7 @@ class SDRStateMachine {
                 reason: 'TRANSICAO_HUMANA'
             });
 
-            return {
-                reply,
-                state: leadStateStore.getLead(leadKey),
-                stage: updatedState.current_funnel_stage
-            };
+            return replyResult;
         } catch (err) {
             logger.error(`[SDR State] Falha ao gerar resposta: ${err.message}`);
             await this._notifyAdminFailure({
@@ -443,12 +458,12 @@ class SDRStateMachine {
     }
 
     _buildConversationHistory(history, leadId) {
-        if (Array.isArray(history) && history.length) {
-            return history;
-        }
+        const raw = Array.isArray(history) && history.length
+            ? history
+            : (leadStateStore.getLead(leadId).history || []);
 
-        const lead = leadStateStore.getLead(leadId);
-        return lead.history || [];
+        // Comprimir para as últimas 6 mensagens / 300 chars por msg antes de enviar ao GPT
+        return contextCompressor.compressMessages(raw);
     }
 
     _getCreativityTemperature(stage) {
